@@ -1,0 +1,2338 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="theme-color" content="#0B192C">
+    <title>Portal Digital Pesantren Al Bashiroh Purwakarta</title>
+    <link rel="icon" type="image/png" href="logo.png?v=6">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,600;0,9..144,700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    
+    <style>
+        :root {
+            --navy-950: #071120;
+            --navy-900: #0B192C;
+            --navy-800: #132847;
+            --navy-700: #1D3B66;
+            --navy-100: #EBF1F8;
+            
+            --gold-600: #B3831E;
+            --gold-500: #D4A02E;
+            --gold-400: #E6B94C;
+            --gold-100: #FDF6E4;
+            --gold-border: rgba(212, 160, 46, 0.35);
+
+            --bg: #F4F7FB;
+            --surface: #FFFFFF;
+            --surface-soft: #F8FAFD;
+            --ink: #0F172A;
+            --muted: #64748B;
+            --border: #E2E8F0;
+            --danger: #DC2626;
+            --success: #059669;
+
+            --shadow-sm: 0 4px 14px rgba(11, 25, 44, 0.06);
+            --shadow-md: 0 18px 40px rgba(11, 25, 44, 0.12);
+            --shadow-gold: 0 8px 24px rgba(212, 160, 46, 0.28);
+
+            --radius-lg: 24px;
+            --radius-md: 16px;
+            --radius-sm: 12px;
+
+            --font-display: "Fraunces", Georgia, serif;
+            --font-body: "Plus Jakarta Sans", -apple-system, BlinkMacSystemFont, sans-serif;
+        }
+
+        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+
+        body {
+            font-family: var(--font-body);
+            background:
+                radial-gradient(circle at 0% 0%, rgba(212, 160, 46, 0.09) 0%, transparent 45%),
+                radial-gradient(circle at 100% 100%, rgba(11, 25, 44, 0.08) 0%, transparent 50%),
+                var(--bg);
+            color: var(--ink);
+            margin: 0;
+            padding: 16px;
+            min-height: 100vh;
+            line-height: 1.5;
+        }
+
+        .mobile-topbar { display: none; }
+
+        .sidebar-toggle {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            background: linear-gradient(135deg, var(--navy-800), var(--navy-950));
+            border: 1.5px solid var(--gold-500);
+            width: 50px;
+            height: 50px;
+            border-radius: 14px;
+            cursor: pointer;
+            z-index: 1001;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 5px;
+            box-shadow: var(--shadow-md);
+            transition: all 0.25s ease;
+        }
+
+        .sidebar-toggle:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-gold);
+        }
+
+        .hamburger-bar {
+            width: 21px;
+            height: 2.5px;
+            background: var(--gold-400);
+            border-radius: 2px;
+        }
+
+        .sidebar {
+            height: 100%;
+            width: 280px;
+            position: fixed;
+            z-index: 1005;
+            top: 0;
+            left: -285px;
+            background: linear-gradient(180deg, var(--navy-900) 0%, var(--navy-950) 100%);
+            overflow-x: hidden;
+            transition: left 0.32s cubic-bezier(0.22, 1, 0.36, 1);
+            padding-top: 14px;
+            box-shadow: 10px 0 35px rgba(7, 17, 32, 0.45);
+            border-right: 1px solid var(--gold-border);
+        }
+
+        .sidebar.active { left: 0; }
+
+        .sidebar-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 16px 20px 18px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+        }
+
+        .sidebar-brand { display: flex; align-items: center; gap: 12px; }
+        .sidebar-logo {
+            width: 38px; height: 38px; border-radius: 50%; object-fit: cover;
+            border: 2px solid var(--gold-500); background: #fff;
+        }
+        .sidebar-header h3 {
+            color: #FFFFFF; margin: 0; font-size: 1.02rem; font-family: var(--font-body); font-weight: 700;
+        }
+        .close-btn {
+            background: rgba(255, 255, 255, 0.08); border: none; color: var(--gold-400);
+            width: 34px; height: 34px; border-radius: 10px; font-size: 1.4rem; cursor: pointer;
+            display: flex; align-items: center; justify-content: center;
+        }
+
+        .sidebar-menu { display: flex; flex-direction: column; padding: 18px 16px; gap: 10px; }
+
+        .tab-btn {
+            background: rgba(255, 255, 255, 0.04);
+            color: #E2E8F0;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            padding: 14px 16px;
+            cursor: pointer;
+            font-weight: 600;
+            border-radius: 14px;
+            text-align: left;
+            font-size: 0.95rem;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            transition: all 0.2s ease;
+        }
+
+        .tab-btn:hover { background: rgba(255, 255, 255, 0.1); border-color: var(--gold-border); }
+        .tab-btn.active {
+            background: linear-gradient(135deg, var(--gold-400) 0%, var(--gold-500) 100%);
+            color: var(--navy-950);
+            border-color: var(--gold-400);
+            font-weight: 800;
+            box-shadow: var(--shadow-gold);
+        }
+
+        .overlay {
+            display: none; position: fixed; inset: 0;
+            background: rgba(7, 17, 32, 0.6); backdrop-filter: blur(4px); z-index: 1004;
+        }
+        .overlay.active { display: block; }
+
+        .container {
+            max-width: 720px;
+            margin: 32px auto 48px;
+            background: var(--surface);
+            padding: 32px 28px 36px;
+            border-radius: var(--radius-lg);
+            box-shadow: var(--shadow-md);
+            border: 1px solid rgba(11, 25, 44, 0.08);
+            border-top: 5px solid var(--gold-500);
+            position: relative;
+            z-index: 2;
+        }
+
+        .tab-content { display: none !important; }
+        .tab-content.active { display: block !important; animation: fadeUp 0.3s ease; }
+
+        .sub-content { display: none !important; }
+        .sub-content.active { display: block !important; animation: fadeUp 0.25s ease; }
+
+        @keyframes fadeUp {
+            from { opacity: 0; transform: translateY(8px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        h1, h2, h3 { color: var(--navy-900); font-family: var(--font-display); }
+        h2 { text-align: center; font-size: clamp(1.3rem, 4vw, 1.55rem); margin: 4px 0 22px; }
+        h3 { font-size: 1.12rem; margin: 0 0 14px; }
+
+        .header-container { display: flex; align-items: center; justify-content: space-between; gap: 16px; }
+        .eyebrow {
+            margin: 0 0 8px; font-size: 0.72rem; color: var(--gold-600); background: var(--gold-100);
+            border: 1px solid var(--gold-border); display: inline-flex; align-items: center; gap: 6px;
+            padding: 4px 12px; border-radius: 100px; font-weight: 800; text-transform: uppercase;
+        }
+        .header-container h1 { margin: 0; font-size: clamp(1.28rem, 4.2vw, 1.55rem); line-height: 1.22; color: var(--navy-900); }
+        .subtitle { margin: 8px 0 0; color: var(--muted); font-size: 0.86rem; line-height: 1.45; }
+        .app-logo {
+            width: 76px; height: 76px; border-radius: 50%; object-fit: cover;
+            border: 3px solid var(--gold-500); box-shadow: 0 6px 18px rgba(11, 25, 44, 0.14);
+            background: #fff; flex-shrink: 0;
+        }
+
+        .header-divider {
+            height: 1px;
+            background: linear-gradient(90deg, transparent, var(--gold-border), var(--border), var(--gold-border), transparent);
+            margin: 22px 0;
+        }
+
+        .network-banner {
+            display: none;
+            background: #FEF2F2;
+            border: 1.5px solid #DC2626;
+            color: #991B1B;
+            padding: 12px 14px;
+            border-radius: 12px;
+            font-size: 0.85rem;
+            font-weight: 700;
+            margin-bottom: 16px;
+            text-align: center;
+        }
+        .network-banner.offline {
+            display: block;
+            animation: fadeUp 0.25s ease;
+        }
+
+        .form-group { margin-bottom: 16px; }
+        label { display: block; margin-bottom: 7px; font-weight: 700; font-size: 0.85rem; color: var(--navy-800); }
+        .hint-text { color: var(--muted); font-size: 0.88rem; margin: 0 0 12px; }
+
+        input, select {
+            width: 100%; min-height: 48px; padding: 12px 14px; margin-bottom: 8px;
+            border: 1.5px solid var(--border); border-radius: var(--radius-sm);
+            font-size: 16px; font-family: var(--font-body); font-weight: 500;
+            background-color: var(--surface-soft); color: var(--ink); transition: all 0.2s ease;
+        }
+        input:focus, select:focus {
+            border-color: var(--navy-800); background-color: #FFFFFF;
+            box-shadow: 0 0 0 3.5px rgba(212, 160, 46, 0.22); outline: none;
+        }
+
+        .admin-lock-box {
+            background: #FFFBEB;
+            border: 1.5px solid var(--gold-500);
+            border-radius: var(--radius-sm);
+            padding: 14px;
+            margin-bottom: 16px;
+            animation: fadeUp 0.25s ease;
+        }
+        .admin-lock-box label {
+            color: #92400E;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .admin-lock-box input {
+            margin-bottom: 0;
+            background: #FFFFFF;
+            border-color: var(--gold-500);
+        }
+
+        button.btn-primary {
+            width: 100%; min-height: 52px;
+            background: linear-gradient(135deg, var(--navy-800) 0%, var(--navy-950) 100%);
+            color: #FFFFFF; border: 1.5px solid var(--gold-500); padding: 14px 18px;
+            font-size: 1rem; font-weight: 700; border-radius: var(--radius-sm); cursor: pointer;
+            margin-top: 8px; box-shadow: 0 8px 20px rgba(11, 25, 44, 0.22); transition: all 0.2s ease;
+            display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+        }
+        button.btn-primary:hover:not(:disabled) {
+            background: linear-gradient(135deg, var(--navy-700) 0%, var(--navy-900) 100%);
+            box-shadow: var(--shadow-gold); transform: translateY(-1px);
+        }
+        button.btn-primary:disabled {
+            opacity: 0.65;
+            cursor: not-allowed;
+        }
+
+        .btn-logout {
+            background: #FEF2F2; color: var(--danger); border: 1.5px solid rgba(220, 38, 38, 0.25);
+            min-height: 46px; padding: 10px 16px; border-radius: var(--radius-sm); cursor: pointer;
+            margin-top: 20px; width: 100%; font-weight: 700; font-size: 0.92rem; transition: background 0.2s ease;
+        }
+        .btn-logout:hover { background: #FEE2E2; }
+        .result-msg { margin-top: 14px; font-weight: 700; text-align: center; font-size: 0.94rem; }
+
+        /* Grid Tombol Nominal Cepat (Mode Jajan Cepat) */
+        .quick-nominal-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 8px;
+            margin-bottom: 10px;
+        }
+        @media (max-width: 480px) {
+            .quick-nominal-grid { grid-template-columns: repeat(3, 1fr); }
+        }
+        .btn-quick-nom {
+            background: #FFFFFF;
+            border: 1.5px solid var(--border);
+            color: var(--navy-900);
+            font-family: var(--font-body);
+            font-weight: 700;
+            font-size: 0.88rem;
+            padding: 11px 6px;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.15s ease;
+            text-align: center;
+        }
+        .btn-quick-nom:hover {
+            border-color: var(--gold-500);
+            background: var(--gold-100);
+        }
+        .btn-quick-nom.selected {
+            background: var(--navy-900);
+            color: var(--gold-400);
+            border-color: var(--gold-500);
+            box-shadow: 0 4px 10px rgba(11, 25, 44, 0.18);
+        }
+
+        .fast-mode-banner {
+            background: linear-gradient(135deg, #FEF3C7 0%, #FDE68A 100%);
+            border: 1.5px solid var(--gold-500);
+            color: #78350F;
+            padding: 11px 14px;
+            border-radius: 12px;
+            font-size: 0.82rem;
+            font-weight: 700;
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 8px;
+        }
+
+        .lock-nominal-box {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            background: var(--navy-100);
+            border: 1.5px solid #CBD5E1;
+            padding: 11px 14px;
+            border-radius: 12px;
+            margin-bottom: 14px;
+            cursor: pointer;
+            user-select: none;
+        }
+        .lock-nominal-box input[type="checkbox"] {
+            width: 20px;
+            height: 20px;
+            min-height: auto;
+            margin: 0;
+            accent-color: var(--navy-900);
+            cursor: pointer;
+        }
+        .lock-nominal-box span {
+            font-size: 0.84rem;
+            font-weight: 700;
+            color: var(--navy-900);
+        }
+
+        /* Stat Card */
+        .stat-card {
+            background: linear-gradient(145deg, var(--navy-900) 0%, var(--navy-950) 100%);
+            border-radius: var(--radius-md); padding: 20px; margin-bottom: 18px; color: #FFFFFF;
+            box-shadow: 0 12px 28px rgba(11, 25, 44, 0.25); border: 1.5px solid var(--gold-500);
+            position: relative; overflow: hidden;
+        }
+        .stat-card-head { display: flex; justify-content: space-between; align-items: center; gap: 8px; margin-bottom: 12px; }
+        .stat-name { font-family: var(--font-display); font-weight: 700; font-size: 1.12rem; color: #FFFFFF; }
+        .stat-badge {
+            background: rgba(212, 160, 46, 0.2); border: 1px solid var(--gold-500); color: var(--gold-400);
+            font-size: 0.72rem; font-weight: 800; padding: 4px 11px; border-radius: 100px;
+        }
+        .stat-hero { display: flex; flex-direction: column; gap: 2px; margin-bottom: 14px; }
+        .stat-hero-label { font-size: 0.78rem; color: #94A3B8; font-weight: 500; }
+        .stat-hero-value { font-family: var(--font-display); font-size: clamp(1.7rem, 6vw, 2.1rem); font-weight: 700; color: var(--gold-400); }
+        .stat-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 14px; }
+        .stat-cell {
+            background: rgba(255, 255, 255, 0.06); border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 12px; padding: 11px 12px; display: flex; flex-direction: column; gap: 3px;
+        }
+        .stat-cell-accent { background: rgba(212, 160, 46, 0.14); border: 1px solid rgba(212, 160, 46, 0.45); }
+        .stat-cell-label { font-size: 0.72rem; color: #CBD5E1; }
+        .stat-cell-value { font-weight: 700; font-size: 0.98rem; color: #FFFFFF; }
+
+        .limit-bar { height: 8px; border-radius: 100px; background: rgba(255, 255, 255, 0.12); overflow: hidden; }
+        .limit-bar-fill {
+            height: 100%; background: linear-gradient(90deg, var(--gold-500), var(--gold-400));
+            border-radius: 100px; transition: width 0.45s ease;
+        }
+        .limit-caption { margin: 8px 0 0; font-size: 0.75rem; color: #CBD5E1; text-align: right; }
+
+        /* Dashboard Pemasukan Filter & Cards */
+        .filter-panel {
+            background: var(--surface-soft);
+            border: 1.5px solid var(--border);
+            border-radius: var(--radius-md);
+            padding: 16px;
+            margin-bottom: 18px;
+        }
+        .filter-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+        }
+        @media (max-width: 520px) {
+            .filter-row { grid-template-columns: 1fr; }
+        }
+        .filter-badge-info {
+            font-size: 0.8rem;
+            color: var(--navy-800);
+            background: var(--gold-100);
+            border: 1px solid var(--gold-border);
+            padding: 7px 12px;
+            border-radius: 8px;
+            margin-top: 6px;
+            font-weight: 600;
+            text-align: center;
+        }
+
+        .pemasukan-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            margin-bottom: 18px;
+        }
+        @media (max-width: 480px) {
+            .pemasukan-grid { grid-template-columns: 1fr; }
+        }
+        .pema-card {
+            background: var(--surface-soft);
+            border: 1.5px solid var(--border);
+            border-radius: var(--radius-md);
+            padding: 16px;
+            box-shadow: var(--shadow-sm);
+            position: relative;
+        }
+        .pema-card.navy-gold {
+            background: linear-gradient(145deg, var(--navy-900), var(--navy-800));
+            border-color: var(--gold-500);
+            color: #FFFFFF;
+        }
+        .pema-card.gold-tint {
+            background: var(--gold-100);
+            border-color: var(--gold-500);
+        }
+        .pema-label { font-size: 0.78rem; color: var(--muted); font-weight: 700; margin-bottom: 4px; display: block; }
+        .pema-card.navy-gold .pema-label { color: var(--gold-400); }
+        .pema-card.gold-tint .pema-label { color: var(--gold-600); }
+        .pema-val { font-family: var(--font-display); font-size: 1.45rem; font-weight: 700; color: var(--navy-900); display: block; }
+        .pema-card.navy-gold .pema-val { color: #FFFFFF; }
+        .pema-sub { font-size: 0.74rem; color: var(--muted); margin-top: 4px; display: block; font-weight: 600; }
+        .pema-card.navy-gold .pema-sub { color: #CBD5E1; }
+
+        .table-responsive {
+            width: 100%;
+            overflow-x: auto;
+            margin-top: 12px;
+            border-radius: var(--radius-sm);
+            border: 1px solid var(--border);
+            max-height: 440px;
+            overflow-y: auto;
+        }
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.85rem;
+            text-align: left;
+            background: #FFFFFF;
+        }
+        .data-table th {
+            background: var(--navy-900);
+            color: var(--gold-400);
+            padding: 11px 12px;
+            font-weight: 700;
+            position: sticky;
+            top: 0;
+            z-index: 2;
+        }
+        .data-table td {
+            padding: 10px 12px;
+            border-bottom: 1px solid var(--border);
+            color: var(--ink);
+        }
+        .data-table tr:hover { background: var(--surface-soft); }
+
+        .badge-topup {
+            background: #DCFCE7; color: #166534; border: 1px solid #86EFAC;
+            padding: 3px 8px; border-radius: 6px; font-size: 0.76rem; font-weight: 700; display: inline-block;
+        }
+        .badge-jajan {
+            background: #FEF3C7; color: #92400E; border: 1px solid #FCD34D;
+            padding: 3px 8px; border-radius: 6px; font-size: 0.76rem; font-weight: 700; display: inline-block;
+        }
+        .badge-other {
+            background: #E2E8F0; color: #1E293B; border: 1px solid #CBD5E1;
+            padding: 3px 8px; border-radius: 6px; font-size: 0.76rem; font-weight: 700; display: inline-block;
+        }
+
+        /* Last Transaction Summary */
+        .last-tx-summary {
+            margin-top: 22px; background: var(--surface-soft); border: 1.5px solid var(--gold-border);
+            border-radius: var(--radius-md); padding: 16px; box-shadow: var(--shadow-sm);
+            animation: fadeUp 0.35s ease;
+        }
+        .last-tx-header {
+            display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap;
+            gap: 8px; margin-bottom: 12px; padding-bottom: 10px; border-bottom: 1px dashed var(--border);
+        }
+        .last-tx-title { font-size: 0.86rem; font-weight: 800; color: var(--navy-900); display: flex; align-items: center; gap: 6px; }
+        .last-tx-santri {
+            font-size: 0.78rem; font-weight: 700; color: var(--navy-900); background: var(--gold-100);
+            border: 1px solid var(--gold-border); padding: 3px 10px; border-radius: 100px;
+        }
+        .last-tx-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+        .last-tx-box {
+            background: #FFFFFF; border: 1px solid var(--border); border-radius: 12px; padding: 11px 10px; text-align: center;
+        }
+        .last-tx-box.highlight {
+            background: linear-gradient(145deg, var(--navy-900), var(--navy-800));
+            border-color: var(--gold-500); color: #FFFFFF;
+        }
+        .last-tx-label { display: block; font-size: 0.72rem; color: var(--muted); margin-bottom: 4px; font-weight: 600; }
+        .last-tx-box.highlight .last-tx-label { color: var(--gold-400); }
+        .last-tx-val { font-size: 0.95rem; font-weight: 800; color: var(--navy-900); word-break: break-word; }
+        .last-tx-box.highlight .last-tx-val { color: #FFFFFF; }
+
+        .sub-tabs {
+            display: grid; grid-template-columns: repeat(2, 1fr); margin-bottom: 18px; gap: 8px;
+            background: var(--navy-100); padding: 8px; border-radius: 14px; border: 1px solid var(--border);
+        }
+        .sub-tab-btn {
+            background: #FFFFFF; border: 1px solid var(--border); padding: 10px 8px; cursor: pointer;
+            font-size: 0.82rem; border-radius: 10px; color: var(--navy-900); font-weight: 700; text-align: center;
+        }
+        .sub-tab-btn.active {
+            background: var(--navy-900); color: var(--gold-400); border-color: var(--gold-500);
+            box-shadow: 0 4px 10px rgba(11, 25, 44, 0.18);
+        }
+        .jenis-note {
+            font-size: 0.8rem; color: var(--navy-800); background: var(--gold-100);
+            border-left: 4px solid var(--gold-500); padding: 10px 12px; border-radius: 8px; margin: -2px 0 14px; font-weight: 500;
+        }
+
+        /* Popup & Animasi Balon */
+        .popup-overlay {
+            position: fixed; inset: 0; background: rgba(7, 17, 32, 0.72); backdrop-filter: blur(4px);
+            display: flex; align-items: center; justify-content: center; z-index: 9999; padding: 16px;
+        }
+        .popup-card {
+            background: var(--surface); padding: 28px 24px; border-radius: 24px; width: 100%; max-width: 390px;
+            text-align: center; border-top: 6px solid var(--gold-500); box-shadow: 0 25px 60px rgba(0, 0, 0, 0.45);
+            position: relative; z-index: 10002; animation: popBounce 0.45s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+        @keyframes popBounce {
+            0% { transform: scale(0.75); opacity: 0; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+        .popup-icon { font-size: 54px; margin-bottom: 6px; display: inline-block; animation: iconWiggle 1s ease-in-out infinite alternate; }
+        @keyframes iconWiggle {
+            0% { transform: rotate(-8deg) scale(1); }
+            100% { transform: rotate(8deg) scale(1.12); }
+        }
+        .popup-details {
+            text-align: left; background: var(--surface-soft); padding: 14px 16px; border-radius: 14px;
+            font-size: 0.94rem; line-height: 1.75; margin-bottom: 18px; border-left: 4px solid var(--gold-500);
+            border: 1px solid var(--border);
+        }
+
+        #balloon-layer { position: fixed; inset: 0; pointer-events: none; overflow: hidden; z-index: 10001; }
+        .balloon-item {
+            position: absolute; bottom: -120px; width: 46px; height: 58px;
+            border-radius: 50% 50% 50% 50% / 45% 45% 55% 55%;
+            box-shadow: inset -6px -8px 14px rgba(0, 0, 0, 0.2), inset 6px 6px 12px rgba(255, 255, 255, 0.5);
+            animation: floatUpBalloon linear forwards; display: flex; justify-content: center;
+        }
+        .balloon-item::before {
+            content: ""; position: absolute; bottom: -6px; width: 10px; height: 8px; background: inherit;
+            clip-path: polygon(50% 0%, 0% 100%, 100% 100%);
+        }
+        .balloon-item::after {
+            content: ""; position: absolute; bottom: -44px; width: 1.5px; height: 38px; background: rgba(255, 255, 255, 0.7);
+        }
+        @keyframes floatUpBalloon {
+            0% { transform: translateY(0) translateX(0) rotate(0deg); opacity: 1; }
+            25% { transform: translateY(-30vh) translateX(var(--sway, 20px)) rotate(6deg); }
+            50% { transform: translateY(-60vh) translateX(calc(var(--sway, 20px) * -1)) rotate(-6deg); }
+            75% { transform: translateY(-90vh) translateX(var(--sway, 20px)) rotate(4deg); opacity: 1; }
+            100% { transform: translateY(-125vh) translateX(0) rotate(-4deg); opacity: 0; }
+        }
+        .confetti-piece {
+            position: absolute; top: -20px; width: 10px; height: 16px; border-radius: 3px;
+            animation: confettiFall linear forwards;
+        }
+        @keyframes confettiFall {
+            0% { transform: translateY(0) rotate(0deg); opacity: 1; }
+            100% { transform: translateY(115vh) rotate(720deg); opacity: 0; }
+        }
+
+        .logo-fallback {
+            width: 76px; height: 76px; border-radius: 50%; background: var(--navy-900);
+            border: 3px solid var(--gold-500); color: var(--gold-400); display: flex;
+            align-items: center; justify-content: center; font-weight: 800; font-size: 1.3rem; flex-shrink: 0;
+        }
+        .logo-fallback-sm { width: 38px; height: 38px; font-size: 0.85rem; }
+
+        @media (max-width: 640px) {
+            body { padding: 0; background: var(--bg); }
+            .sidebar-toggle { display: none; }
+            .mobile-topbar {
+                display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 999;
+                background: rgba(11, 25, 44, 0.96); backdrop-filter: blur(10px); padding: 12px 16px;
+                border-bottom: 1.5px solid var(--gold-500); box-shadow: 0 4px 16px rgba(7, 17, 32, 0.2);
+            }
+            .mobile-topbar-left { display: flex; align-items: center; gap: 10px; }
+            .mobile-menu-btn {
+                background: rgba(255, 255, 255, 0.08); border: 1px solid var(--gold-border); color: var(--gold-400);
+                width: 40px; height: 40px; border-radius: 11px; display: flex; flex-direction: column;
+                align-items: center; justify-content: center; gap: 4px; cursor: pointer;
+            }
+            .mobile-topbar-title { color: #FFFFFF; font-weight: 700; font-size: 0.95rem; }
+            .mobile-topbar-sub { display: block; color: var(--gold-400); font-size: 0.7rem; font-weight: 600; }
+            .container { margin: 14px 12px 32px; padding: 22px 18px 26px; border-radius: 20px; border-top-width: 4px; }
+            .header-container { flex-direction: row; align-items: center; gap: 12px; }
+            .app-logo, .logo-fallback { width: 60px; height: 60px; }
+            .subtitle { font-size: 0.8rem; }
+            .stat-card { padding: 16px; }
+            .stat-grid { grid-template-columns: 1fr 1fr; gap: 8px; }
+            .last-tx-grid { grid-template-columns: 1fr; gap: 8px; }
+            .last-tx-box { display: flex; justify-content: space-between; align-items: center; padding: 11px 14px; text-align: left; }
+            .last-tx-label { margin-bottom: 0; font-size: 0.78rem; }
+            .last-tx-val { font-size: 0.95rem; }
+        }
+    </style>
+</head>
+<body>
+
+    <header class="mobile-topbar">
+        <div class="mobile-topbar-left">
+            <button class="mobile-menu-btn" onclick="toggleSidebar()" aria-label="Buka menu">
+                <span class="hamburger-bar"></span>
+                <span class="hamburger-bar"></span>
+                <span class="hamburger-bar"></span>
+            </button>
+            <div>
+                <span class="mobile-topbar-title">Al Bashiroh Digital</span>
+                <span class="mobile-topbar-sub">Purwakarta</span>
+            </div>
+        </div>
+        <img src="logo.png?v=6" alt="" style="width:36px;height:36px;border-radius:50%;border:1.5px solid #D4A02E;object-fit:cover;background:#fff;" onerror="this.style.display='none'">
+    </header>
+
+    <button class="sidebar-toggle" onclick="toggleSidebar()" aria-label="Buka menu">
+        <span class="hamburger-bar"></span>
+        <span class="hamburger-bar"></span>
+        <span class="hamburger-bar"></span>
+    </button>
+
+    <div id="app-sidebar" class="sidebar">
+        <div class="sidebar-header">
+            <div class="sidebar-brand">
+                <img src="logo.png?v=6" alt="" class="sidebar-logo" onerror="this.onerror=null;this.replaceWith(Object.assign(document.createElement('span'),{className:'logo-fallback logo-fallback-sm',textContent:'PP'}))">
+                <h3>Navigasi Menu</h3>
+            </div>
+            <button class="close-btn" onclick="toggleSidebar()" aria-label="Tutup menu">×</button>
+        </div>
+        <div class="sidebar-menu">
+            <button class="tab-btn active" onclick="switchTab(event, 'tab-kantin')"><span class="tab-icon">🏪</span> Kantin Jajan (PIN)</button>
+            <button class="tab-btn" onclick="switchTab(event, 'tab-jajan-cepat')"><span class="tab-icon">⚡</span> Jajan Cepat (Tanpa PIN)</button>
+            <button class="tab-btn" onclick="switchTab(event, 'tab-bendahara')"><span class="tab-icon">🧮</span> Bendahara &amp; SPP</button>
+            <button class="tab-btn" onclick="switchTab(event, 'tab-pemasukan')"><span class="tab-icon">💰</span> Dashboard Pemasukan</button>
+        </div>
+    </div>
+
+    <div id="sidebar-overlay" class="overlay" onclick="toggleSidebar()"></div>
+    <div id="balloon-layer" aria-hidden="true"></div>
+
+    <div class="container">
+        <div class="header-container">
+            <div class="title-wrapper">
+                <p class="eyebrow">✦ Sistem Terpadu Santri</p>
+                <h1>Portal Digital<br>Pesantren Al Bashiroh<br>Purwakarta</h1>
+                <p class="subtitle">Kantin digital, top-up saldo, tabungan, dan tagihan SPP dalam satu genggaman</p>
+            </div>
+            <img src="logo.png?v=6" alt="Logo Pesantren" class="app-logo" onerror="this.onerror=null;this.replaceWith(Object.assign(document.createElement('span'),{className:'logo-fallback',textContent:'PP'}))">
+        </div>
+        <div class="header-divider" aria-hidden="true"></div>
+
+        <!-- PERINGATAN KONEKSI INTERNET TERPUTUS -->
+        <div id="network-status-banner" class="network-banner">
+            ⚠️ Koneksi internet terputus (Offline)! Transaksi jajan &amp; database tidak dapat diproses sampai internet kembali normal.
+        </div>
+
+        <!-- TAB 1: KANTIN REGULER (DENGAN PIN) -->
+        <div id="tab-kantin" class="tab-content active">
+            <h2>Kantin Digital Santri</h2>
+            <div class="form-group">
+                <label>1. Tempelkan / masukkan ID kartu RFID</label>
+                <input type="text" id="kantin-uid" placeholder="Menunggu kartu..." autocomplete="off" autofocus>
+            </div>
+
+            <div id="kantin-info-kartu" class="stat-card" style="display: none;">
+                <div class="stat-card-head">
+                    <span class="stat-name" id="stat-nama">—</span>
+                    <span class="stat-badge" id="stat-badge">Terdeteksi</span>
+                </div>
+                <div class="stat-hero">
+                    <span class="stat-hero-label">Saldo Jajan saat ini</span>
+                    <span class="stat-hero-value" id="stat-saldo">Rp 0</span>
+                </div>
+                <div class="stat-grid">
+                    <div class="stat-cell">
+                        <span class="stat-cell-label">Sudah jajan hari ini</span>
+                        <span class="stat-cell-value" id="stat-sudah-jajan">Rp 0</span>
+                    </div>
+                    <div class="stat-cell stat-cell-accent">
+                        <span class="stat-cell-label">Sisa limit harian</span>
+                        <span class="stat-cell-value" id="stat-sisa-limit">Rp 0</span>
+                    </div>
+                </div>
+                <div class="limit-bar" aria-hidden="true">
+                    <div class="limit-bar-fill" id="limit-bar-fill" style="width:0%"></div>
+                </div>
+                <p class="limit-caption">Limit harian: <span id="stat-limit-total">Rp 0</span></p>
+            </div>
+
+            <div class="form-group">
+                <label>2. Pilih jenis transaksi</label>
+                <select id="kantin-jenis" onchange="ubahJenisTransaksi(this)">
+                    <option value="jajan">🍔 Jajan (kena limit harian)</option>
+                    <option value="ambil_cash">💵 Ambil Cash (khusus admin, tidak kena limit)</option>
+                    <option value="lainnya">📝 Lainnya / Bebas (khusus admin, tidak kena limit)</option>
+                </select>
+                <p class="jenis-note" id="jenis-note">ℹ️ Transaksi jajan biasa. Nominal akan dipotong dari limit jajan harian santri.</p>
+            </div>
+
+            <div id="grup-kunci-admin-kantin" class="admin-lock-box" style="display: none;">
+                <label>🔐 Kunci Admin (Wajib diisi untuk Ambil Cash / Keperluan Lain)</label>
+                <input type="password" id="kantin-admin-key" placeholder="Masukkan kunci otorisasi admin..." autocomplete="new-password">
+            </div>
+
+            <div class="form-group" id="grup-nominal-cepat">
+                <label>3. Pilih nominal cepat (opsional)</label>
+                <select id="kantin-nominal-cepat" onchange="pilihNominalCepat(this)">
+                    <option value="">-- Pilih nominal --</option>
+                    <option value="1000">Rp 1.000</option>
+                    <option value="2000">Rp 2.000</option>
+                    <option value="3000">Rp 3.000</option>
+                    <option value="4000">Rp 4.000</option>
+                    <option value="5000">Rp 5.000</option>
+                    <option value="6000">Rp 6.000</option>
+                    <option value="7000">Rp 7.000</option>
+                    <option value="8000">Rp 8.000</option>
+                    <option value="9000">Rp 9.000</option>
+                    <option value="10000">Rp 10.000</option>
+                    <option value="11000">Rp 11.000</option>
+                    <option value="12000">Rp 12.000</option>
+                    <option value="13000">Rp 13.000</option>
+                    <option value="14000">Rp 14.000</option>
+                    <option value="15000">Rp 15.000</option>
+                    <option value="16000">Rp 16.000</option>
+                    <option value="17000">Rp 17.000</option>
+                    <option value="18000">Rp 18.000</option>
+                    <option value="19000">Rp 19.000</option>
+                    <option value="20000">Rp 20.000</option>
+                    <option value="custom">Nominal lain (isi manual)</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label>4. Atau masukkan nominal manual (Rp)</label>
+                <input type="text" inputmode="numeric" class="input-rupiah" id="kantin-nominal" value="0">
+            </div>
+            <div class="form-group" id="grup-keterangan-bebas" style="display:none;">
+                <label>Keterangan transaksi (wajib diisi)</label>
+                <input type="text" id="kantin-keterangan" placeholder="Tulis keterangan transaksi di sini">
+            </div>
+            <div class="form-group">
+                <label>5. Masukkan PIN santri</label>
+                <input type="password" inputmode="numeric" id="kantin-pin" placeholder="Ketik PIN di sini" autocomplete="new-password">
+            </div>
+            <button class="btn-primary" id="btn-proses-jajan" onclick="prosesJajan()">Proses transaksi jajan 💳</button>
+            <div id="kantin-result" class="result-msg"></div>
+
+            <div id="last-tx-summary" class="last-tx-summary" style="display: none;">
+                <div class="last-tx-header">
+                    <span class="last-tx-title">🧾 Ringkasan Transaksi Terakhir</span>
+                    <span class="last-tx-santri" id="summary-nama-santri">-</span>
+                </div>
+                <div class="last-tx-grid">
+                    <div class="last-tx-box highlight">
+                        <span class="last-tx-label">Jajan / Transaksi</span>
+                        <span class="last-tx-val" id="summary-jajan-nominal">Rp 0</span>
+                    </div>
+                    <div class="last-tx-box">
+                        <span class="last-tx-label">Sisa Saldo</span>
+                        <span class="last-tx-val" id="summary-sisa-saldo">Rp 0</span>
+                    </div>
+                    <div class="last-tx-box">
+                        <span class="last-tx-label">Sisa Limit Harian</span>
+                        <span class="last-tx-val" id="summary-sisa-limit">Rp 0</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- TAB BARU: JAJAN CEPAT TANPA PIN (DISAMAKAN DENGAN KANTIN REGULER + BALON) -->
+        <div id="tab-jajan-cepat" class="tab-content">
+            <h2>⚡ Kantin Express (Tanpa PIN)</h2>
+
+            <!-- GERBANG LOGIN ADMIN -->
+            <div id="fast-login-box">
+                <div class="admin-lock-box">
+                    <label>🔐 Otorisasi Petugas / Admin Diperlukan</label>
+                    <p class="hint-text" style="margin-bottom: 10px;">Mode jajan tanpa PIN hanya boleh diaktifkan oleh petugas kantin / admin saat jam istirahat padat.</p>
+                    <input type="password" id="fast-admin-key" placeholder="Masukkan sandi admin..." onkeydown="if(event.key==='Enter') loginFastMode()">
+                </div>
+                <button class="btn-primary" onclick="loginFastMode()">🔓 Aktifkan Mode Jajan Cepat</button>
+                <div id="fast-login-result" class="result-msg"></div>
+            </div>
+
+            <!-- DASHBOARD JAJAN CEPAT AKTIF -->
+            <div id="fast-dashboard" style="display: none;">
+                <div class="fast-mode-banner">
+                    <span>⚡ MODE EXPRESS AKTIF (Tanpa PIN)</span>
+                    <span id="fast-tx-counter" style="background:#78350F;color:#FDE68A;padding:3px 9px;border-radius:99px;font-size:0.75rem;">0 trx</span>
+                </div>
+
+                <!-- 1. INPUT RFID -->
+                <div class="form-group">
+                    <label>1. Tempelkan / masukkan ID kartu RFID</label>
+                    <input type="text" id="fast-uid" placeholder="Menunggu kartu..." autocomplete="off">
+                </div>
+
+                <!-- KARTU STATUS SANTRI LENGKAP (SAMA DENGAN JAJAN PIN: SALDO, SUDAH JAJAN, SISA LIMIT & BAR) -->
+                <div id="fast-info-kartu" class="stat-card" style="display: none;">
+                    <div class="stat-card-head">
+                        <span class="stat-name" id="fast-stat-nama">—</span>
+                        <span class="stat-badge" id="fast-stat-badge">Terdeteksi</span>
+                    </div>
+                    <div class="stat-hero">
+                        <span class="stat-hero-label">Saldo Jajan saat ini</span>
+                        <span class="stat-hero-value" id="fast-stat-saldo">Rp 0</span>
+                    </div>
+                    <div class="stat-grid">
+                        <div class="stat-cell">
+                            <span class="stat-cell-label">Sudah jajan hari ini</span>
+                            <span class="stat-cell-value" id="fast-stat-sudah-jajan">Rp 0</span>
+                        </div>
+                        <div class="stat-cell stat-cell-accent">
+                            <span class="stat-cell-label">Sisa limit harian</span>
+                            <span class="stat-cell-value" id="fast-stat-sisa-limit">Rp 0</span>
+                        </div>
+                    </div>
+                    <div class="limit-bar" aria-hidden="true">
+                        <div class="limit-bar-fill" id="fast-limit-bar-fill" style="width:0%"></div>
+                    </div>
+                    <p class="limit-caption">Limit harian: <span id="fast-stat-limit-total">Rp 0</span></p>
+                </div>
+
+                <!-- 2. PILIH JENIS TRANSAKSI (SAMA DENGAN JAJAN PIN) -->
+                <div class="form-group">
+                    <label>2. Pilih jenis transaksi</label>
+                    <select id="fast-jenis" onchange="ubahJenisTransaksiFast(this)">
+                        <option value="jajan">🍔 Jajan (kena limit harian)</option>
+                        <option value="ambil_cash">💵 Ambil Cash (tidak kena limit)</option>
+                        <option value="lainnya">📝 Lainnya / Bebas (tidak kena limit)</option>
+                    </select>
+                    <p class="jenis-note" id="fast-jenis-note">ℹ️ Transaksi jajan cepat tanpa PIN. Nominal akan dipotong dari limit jajan harian santri.</p>
+                </div>
+
+                <!-- 3. PILIH NOMINAL CEPAT (1x KLIK) & MANUAL -->
+                <div class="form-group" id="fast-grup-nominal-cepat">
+                    <label>3. Pilih nominal cepat (1x klik)</label>
+                    <div class="quick-nominal-grid" id="fast-quick-buttons">
+                        <button type="button" class="btn-quick-nom" onclick="setFastNominal(1000, this)">Rp 1.000</button>
+                        <button type="button" class="btn-quick-nom" onclick="setFastNominal(2000, this)">Rp 2.000</button>
+                        <button type="button" class="btn-quick-nom" onclick="setFastNominal(3000, this)">Rp 3.000</button>
+                        <button type="button" class="btn-quick-nom" onclick="setFastNominal(4000, this)">Rp 4.000</button>
+                        <button type="button" class="btn-quick-nom" onclick="setFastNominal(5000, this)">Rp 5.000</button>
+                        <button type="button" class="btn-quick-nom" onclick="setFastNominal(6000, this)">Rp 6.000</button>
+                        <button type="button" class="btn-quick-nom" onclick="setFastNominal(7000, this)">Rp 7.000</button>
+                        <button type="button" class="btn-quick-nom" onclick="setFastNominal(8000, this)">Rp 8.000</button>
+                        <button type="button" class="btn-quick-nom" onclick="setFastNominal(10000, this)">Rp 10.000</button>
+                        <button type="button" class="btn-quick-nom" onclick="setFastNominal(12000, this)">Rp 12.000</button>
+                        <button type="button" class="btn-quick-nom" onclick="setFastNominal(15000, this)">Rp 15.000</button>
+                        <button type="button" class="btn-quick-nom" onclick="setFastNominal(20000, this)">Rp 20.000</button>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>4. Atau masukkan nominal manual (Rp)</label>
+                    <input type="text" inputmode="numeric" class="input-rupiah" id="fast-nominal" value="0" placeholder="Ketik nominal lalu tekan Enter..." onkeydown="if(event.key==='Enter') prosesJajanCepat()">
+                </div>
+
+                <!-- KETERANGAN KHUSUS JENIS LAINNYA -->
+                <div class="form-group" id="fast-grup-keterangan" style="display:none;">
+                    <label>Keterangan transaksi (wajib diisi)</label>
+                    <input type="text" id="fast-keterangan" placeholder="Tulis keterangan transaksi di sini" onkeydown="if(event.key==='Enter') prosesJajanCepat()">
+                </div>
+
+                <!-- OPSI KUNCI NOMINAL (AUTO-PROSES SAAT TAP KARTU) -->
+                <label class="lock-nominal-box" for="fast-lock-nominal">
+                    <input type="checkbox" id="fast-lock-nominal" onchange="toggleLockNominalFast()">
+                    <span>🔒 Kunci Nominal &amp; Auto-Bayar saat Tap Kartu (Super Cepat untuk antrean harga sama)</span>
+                </label>
+
+                <button class="btn-primary" id="btn-proses-fast" onclick="prosesJajanCepat()">⚡ Proses transaksi jajan cepat 💳</button>
+                <div id="fast-result" class="result-msg"></div>
+
+                <!-- RINGKASAN TRANSAKSI EXPRESS TERAKHIR -->
+                <div id="fast-last-summary" class="last-tx-summary" style="display: none;">
+                    <div class="last-tx-header">
+                        <span class="last-tx-title">🧾 Ringkasan Transaksi Terakhir</span>
+                        <span class="last-tx-santri" id="fast-sum-nama">-</span>
+                    </div>
+                    <div class="last-tx-grid">
+                        <div class="last-tx-box highlight">
+                            <span class="last-tx-label">Jajan / Transaksi</span>
+                            <span class="last-tx-val" id="fast-sum-nominal">Rp 0</span>
+                        </div>
+                        <div class="last-tx-box">
+                            <span class="last-tx-label">Sisa Saldo</span>
+                            <span class="last-tx-val" id="fast-sum-saldo">Rp 0</span>
+                        </div>
+                        <div class="last-tx-box">
+                            <span class="last-tx-label">Sisa Limit Harian</span>
+                            <span class="last-tx-val" id="fast-sum-limit">Rp 0</span>
+                        </div>
+                    </div>
+                </div>
+
+                <button class="btn-logout" onclick="logoutFastMode()">🔒 Kunci Kembali Mode Jajan Cepat</button>
+            </div>
+        </div>
+
+        <!-- TAB 2: BENDAHARA & TABUNGAN -->
+        <div id="tab-bendahara" class="tab-content">
+            <h2>Portal Bendahara Pesantren</h2>
+            <div id="admin-login-box">
+                <p class="hint-text">Masukkan kunci admin untuk akses menu bendahara</p>
+                <input type="password" id="admin-key" placeholder="Kunci admin">
+                <button class="btn-primary" onclick="loginAdmin()">Masuk admin</button>
+                <div id="login-result" class="result-msg"></div>
+            </div>
+
+            <div id="admin-dashboard" style="display: none;">
+                <div class="sub-tabs">
+                    <button class="sub-tab-btn active" onclick="switchSubTab(event, 'sub-topup')">Top-up Uang Saku</button>
+                    <button class="sub-tab-btn" onclick="switchSubTab(event, 'sub-tabungan')">🏦 Tabungan Santri</button>
+                    <button class="sub-tab-btn" onclick="switchSubTab(event, 'sub-input-spp')">📌 Input SPP</button>
+                    <button class="sub-tab-btn" onclick="switchSubTab(event, 'sub-bayar-spp')">💳 Bayar SPP</button>
+                    <button class="sub-tab-btn" onclick="switchSubTab(event, 'sub-daftar')">Daftar Santri</button>
+                    <button class="sub-tab-btn" onclick="switchSubTab(event, 'sub-cek')">Cek Saldo</button>
+                </div>
+
+                <div id="sub-topup" class="sub-content active">
+                    <h3>Form Top-up Saldo Uang Saku</h3>
+                    <input type="text" id="topup-uid" placeholder="ID kartu RFID santri / ID Santri" autocomplete="off">
+                    <input type="text" inputmode="numeric" class="input-rupiah" id="topup-nominal" placeholder="Nominal top-up (Rp)" autocomplete="off">
+                    <select id="topup-metode">
+                        <option value="tunai">💵 BSI / Cash (tunai)</option>
+                        <option value="qris">📱 QRIS otomatis</option>
+                    </select>
+                    <button class="btn-primary" id="btn-proses-topup" onclick="prosesTopUp()">Proses top-up 💰</button>
+                    <div id="topup-result" class="result-msg"></div>
+                </div>
+
+                <div id="sub-tabungan" class="sub-content">
+                    <h3>Kelola Tabungan Santri (Setor & Tarik)</h3>
+                    <p class="hint-text">Gunakan menu ini untuk menyetor atau mengambil saldo tabungan santri.</p>
+                    <label>ID / UID Santri:</label>
+                    <input type="text" id="tabungan-uid" placeholder="ID kartu RFID santri / ID Santri" autocomplete="off">
+                    <label>Jenis Transaksi Tabungan:</label>
+                    <select id="tabungan-tipe">
+                        <option value="setor">📥 Setor Tabungan</option>
+                        <option value="tarik">📤 Tarik Tunai Tabungan</option>
+                    </select>
+                    <label>Nominal (Rp):</label>
+                    <input type="text" inputmode="numeric" class="input-rupiah" id="tabungan-nominal" placeholder="Contoh: 50.000" autocomplete="off">
+                    <label>Keterangan (Opsional):</label>
+                    <input type="text" id="tabungan-keterangan" placeholder="Misal: Tabungan lebaran / ambil uang muka" autocomplete="off">
+                    <button class="btn-primary" id="btn-proses-tabungan" onclick="prosesTabunganSantri()">Proses Tabungan 🏦</button>
+                    <div id="tabungan-result" class="result-msg"></div>
+                </div>
+
+                <div id="sub-input-spp" class="sub-content">
+                    <h3>Form Input Tagihan SPP Santri</h3>
+                    <input type="text" id="spp-id-santri" placeholder="Masukkan ID Santri atau UID Kartu">
+                    <select id="spp-bulan">
+                        <option value="Juli">Juli</option><option value="Agustus">Agustus</option><option value="September">September</option>
+                        <option value="Oktober">Oktober</option><option value="November">November</option><option value="Desember">Desember</option>
+                    </select>
+                    <input type="number" id="spp-tahun" value="2026">
+                    <input type="text" inputmode="numeric" class="input-rupiah" id="spp-nominal" placeholder="Nominal SPP (Rp)">
+                    <button class="btn-primary" onclick="prosesSimpanTagihanSpp()">📌 Simpan Tagihan SPP</button>
+                    <div id="spp-input-result" class="result-msg"></div>
+                </div>
+
+                <div id="sub-bayar-spp" class="sub-content">
+                    <h3>Form Pelunasan SPP</h3>
+                    <div style="display:flex; gap:8px;">
+                        <input type="text" id="spp-cari-uid" placeholder="Ketik ID / Scan RFID Santri" style="margin-bottom:0;">
+                        <button class="btn-primary" onclick="prosesCariTagihanSpp()" style="width: auto; margin-top:0; white-space:nowrap;">🔍 Cari</button>
+                    </div>
+                    <div id="spp-list-wrapper" style="margin-top:16px;"></div>
+                </div>
+
+                <div id="sub-daftar" class="sub-content">
+                    <h3>Pendaftaran Santri Baru</h3>
+                    <input type="text" id="daftar-uid" placeholder="ID kartu RFID baru">
+                    <input type="text" id="daftar-nama" placeholder="Nama lengkap santri">
+                    <input type="number" id="daftar-kelas" placeholder="Kelas (angka)">
+                    <input type="text" id="daftar-kamar" placeholder="Kamar / blok asrama">
+                    <input type="password" id="daftar-pin" placeholder="PIN rahasia">
+                    <input type="text" inputmode="numeric" class="input-rupiah" id="daftar-saldo" placeholder="Saldo awal jajan (Rp)" value="0">
+                    <input type="text" inputmode="numeric" class="input-rupiah" id="daftar-tabungan" placeholder="Saldo awal tabungan (Rp)" value="0">
+                    <input type="text" inputmode="numeric" class="input-rupiah" id="daftar-limit" placeholder="Limit harian (Rp)" value="20.000">
+                    <button class="btn-primary" onclick="prosesDaftar()">Daftarkan santri ✍</button>
+                    <div id="daftar-result" class="result-msg"></div>
+                </div>
+
+                <div id="sub-cek" class="sub-content">
+                    <h3>Cek Saldo Santri</h3>
+                    <input type="text" id="cek-uid" placeholder="ID kartu RFID">
+                    <button class="btn-primary" onclick="prosesCekSaldo()">Cek saldo 🔍</button>
+                    <div id="cek-result" class="result-msg"></div>
+                </div>
+
+                <button class="btn-logout" onclick="logoutAdmin()">🚪 Logout admin</button>
+            </div>
+        </div>
+
+        <!-- TAB 3: DASHBOARD PEMASUKAN & REKAP TRANSAKSI -->
+        <div id="tab-pemasukan" class="tab-content">
+            <h2>Dashboard Pemasukan &amp; Rekap Kantin</h2>
+            <div id="pemasukan-login-box">
+                <p class="hint-text">Masukkan password bendahara untuk melihat laporan pemasukan &amp; jajan</p>
+                <input type="password" id="pemasukan-pw" placeholder="Password bendahara">
+                <button class="btn-primary" onclick="loginPemasukan()">Masuk dashboard</button>
+                <div id="pemasukan-login-result" class="result-msg"></div>
+            </div>
+
+            <div id="pemasukan-dashboard" style="display: none;">
+                <div class="filter-panel">
+                    <div class="filter-row">
+                        <div>
+                            <label>📅 Pilih Mode Periode:</label>
+                            <select id="filter-mode-waktu" onchange="ubahModeFilterWaktu()">
+                                <option value="hari_ini">Hari Ini</option>
+                                <option value="per_tanggal">Per 1 Tanggal Tertentu</option>
+                                <option value="rentang">Rentang Tanggal (Bisa Beda Bulan)</option>
+                                <option value="semua" selected>Semua Data (Dari Awal s/d Terakhir)</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label>🏷️ Filter Kategori Tabel:</label>
+                            <select id="filter-kategori-log" onchange="muatDataPemasukan()">
+                                <option value="semua">Semua Transaksi</option>
+                                <option value="topup">Hanya Top-Up Saldo</option>
+                                <option value="jajan">Hanya Jajan Kantin</option>
+                                <option value="lainnya">Ambil Cash / Tabungan / Lainnya</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div id="box-per-tanggal" style="display: none; margin-top: 8px;">
+                        <label>Pilih Tanggal:</label>
+                        <input type="date" id="input-tanggal-tunggal" onchange="muatDataPemasukan()">
+                    </div>
+
+                    <div id="box-rentang-tanggal" class="filter-row" style="display: none; margin-top: 8px;">
+                        <div>
+                            <label>Dari Tanggal:</label>
+                            <input type="date" id="input-tanggal-awal" onchange="muatDataPemasukan()">
+                        </div>
+                        <div>
+                            <label>Sampai Tanggal:</label>
+                            <input type="date" id="input-tanggal-akhir" onchange="muatDataPemasukan()">
+                        </div>
+                    </div>
+
+                    <button class="btn-primary" onclick="muatDataPemasukan()" style="min-height: 44px; padding: 10px; font-size: 0.9rem; margin-top: 6px;">🔍 Tampilkan / Refresh Rekap</button>
+                    <div class="filter-badge-info" id="info-rentang-aktif">Menampilkan: Semua Data (Dari Awal s/d Terakhir)</div>
+                </div>
+
+                <div class="pemasukan-grid">
+                    <div class="pema-card navy-gold">
+                        <span class="pema-label">💵 Total Pemasukan Top-Up</span>
+                        <span class="pema-val" id="pema-total-topup">Rp 0</span>
+                        <span class="pema-sub" id="pema-count-topup">0 transaksi top-up</span>
+                    </div>
+                    <div class="pema-card gold-tint">
+                        <span class="pema-label">🍔 Total Transaksi Jajan Kantin</span>
+                        <span class="pema-val" id="pema-total-jajan">Rp 0</span>
+                        <span class="pema-sub" id="pema-count-jajan">0 transaksi jajan</span>
+                    </div>
+                    <div class="pema-card">
+                        <span class="pema-label">📤 Ambil Cash &amp; Lainnya</span>
+                        <span class="pema-val" id="pema-total-lainnya">Rp 0</span>
+                        <span class="pema-sub" id="pema-count-lainnya">0 transaksi</span>
+                    </div>
+                    <div class="pema-card">
+                        <span class="pema-label">📊 Total Perputaran Data</span>
+                        <span class="pema-val" id="pema-total-semua">Rp 0</span>
+                        <span class="pema-sub" id="pema-count-semua">Total 0 log tercatat</span>
+                    </div>
+                </div>
+
+                <div style="display: flex; justify-content: space-between; align-items: center; margin: 16px 0 8px;">
+                    <h3 style="margin:0;">📋 Rincian Log Transaksi</h3>
+                    <span style="font-size: 0.78rem; color: var(--muted); font-weight: 600;" id="label-jumlah-baris">0 baris</span>
+                </div>
+
+                <div class="table-responsive">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Waktu</th>
+                                <th>Nama Santri</th>
+                                <th>Kategori &amp; Status</th>
+                                <th>Nominal</th>
+                            </tr>
+                        </thead>
+                        <tbody id="pema-table-body">
+                            <tr><td colspan="4" style="text-align: center; color: var(--muted);">Memuat data...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <button class="btn-logout" onclick="logoutPemasukan()">🚪 Logout dashboard</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- POPUP TRANSAKSI BERHASIL -->
+    <div id="popup-balon" class="popup-overlay" style="display: none;">
+        <div class="popup-card">
+            <div class="popup-icon">🎈</div>
+            <h3>Transaksi Berhasil!</h3>
+            <div id="popup-content-detail" class="popup-details"></div>
+            <button class="btn-primary" onclick="tutupPopup()">Selesai &amp; Reset Form</button>
+        </div>
+    </div>
+
+    <script>
+        const SUPABASE_URL = "https://ijipnnhgbzwatdzbdlek.supabase.co";
+        const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImlqaXBubmhnYnp3YXRkemJkbGVrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODgzMjc3NDIsImV4cCI6MjEwMzkwMzc0Mn0.TviHZ5O25ZSif9DawhcywKD9c3d4bv3yGnLPGk6iMAU";
+
+        const { createClient } = supabase;
+        const _supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
+
+        const TABLE_SANTRI = "Data_Santri";
+        const TABLE_LOG = "Log_Transaksi";
+        const TABLE_SPP = "Tagihan_SPP";
+        const LIMIT_DEFAULT = 20000;
+        const ADMIN_KEYS = ["135642", "ismailafauzi174"];
+        let autoResetTimer = null;
+        let isProcessingTx = false;
+        let fastTxCount = 0;
+        let fastScanTimer = null;
+        let activePopupContext = "kantin"; // "kantin" atau "fast"
+
+        function isValidAdminKey(key) {
+            return ADMIN_KEYS.includes((key || "").trim());
+        }
+
+        function updateNetworkStatus() {
+            const banner = document.getElementById("network-status-banner");
+            if (!banner) return;
+            if (!navigator.onLine) {
+                banner.classList.add("offline");
+            } else {
+                banner.classList.remove("offline");
+            }
+        }
+
+        window.addEventListener("online", updateNetworkStatus);
+        window.addEventListener("offline", updateNetworkStatus);
+
+        function formatRupiah(n) {
+            return "Rp " + (Number(n) || 0).toLocaleString("id-ID");
+        }
+
+        function formatRibu(n) {
+            let val = Number(n) || 0;
+            if (val >= 1000 && val % 1000 === 0) {
+                return `${formatRupiah(val)} (${val / 1000} ribu)`;
+            }
+            return formatRupiah(val);
+        }
+
+        function formatAngkaInput(el) {
+            let posisiDariBelakang = el.value.length - el.selectionStart;
+            let angka = el.value.replace(/\D/g, "");
+            if (angka === "") { el.value = ""; return; }
+            angka = angka.replace(/^0+(?=\d)/, "");
+            el.value = Number(angka).toLocaleString("id-ID");
+            let posisiBaru = el.value.length - posisiDariBelakang;
+            el.setSelectionRange(posisiBaru, posisiBaru);
+        }
+
+        function pilihNominalCepat(select) {
+            let input = document.getElementById("kantin-nominal");
+            let val = select.value;
+            if (val === "" || val === "custom") {
+                input.value = "0";
+                input.focus();
+                input.select();
+                return;
+            }
+            input.value = val;
+            formatAngkaInput(input);
+        }
+
+        function ubahJenisTransaksi(select) {
+            let jenis = select.value;
+            let note = document.getElementById("jenis-note");
+            let grupNominalCepat = document.getElementById("grup-nominal-cepat");
+            let grupKeterangan = document.getElementById("grup-keterangan-bebas");
+            let grupKunciAdmin = document.getElementById("grup-kunci-admin-kantin");
+            let adminKeyInput = document.getElementById("kantin-admin-key");
+            let keteranganInput = document.getElementById("kantin-keterangan");
+            let tombol = document.getElementById("btn-proses-jajan");
+
+            if (jenis === "ambil_cash") {
+                note.innerText = "ℹ️ Ambil cash khusus admin (tidak dipotong dari limit jajan harian santri).";
+                grupNominalCepat.style.display = "none";
+                grupKeterangan.style.display = "none";
+                grupKunciAdmin.style.display = "block";
+                adminKeyInput.value = "";
+                keteranganInput.value = "";
+                tombol.innerText = "Proses ambil cash 💵";
+            } else if (jenis === "lainnya") {
+                note.innerText = "ℹ️ Keperluan lain khusus admin (tidak dipotong dari limit harian). Wajib isi kunci admin & keterangan.";
+                grupNominalCepat.style.display = "none";
+                grupKeterangan.style.display = "block";
+                grupKunciAdmin.style.display = "block";
+                adminKeyInput.value = "";
+                keteranganInput.value = "";
+                tombol.innerText = "Proses transaksi 📝";
+            } else {
+                note.innerText = "ℹ️ Transaksi jajan biasa. Nominal akan dipotong dari limit jajan harian santri.";
+                grupNominalCepat.style.display = "block";
+                grupKeterangan.style.display = "none";
+                grupKunciAdmin.style.display = "none";
+                adminKeyInput.value = "";
+                keteranganInput.value = "";
+                tombol.innerText = "Proses transaksi jajan 💳";
+            }
+        }
+
+        function ubahJenisTransaksiFast(select) {
+            let jenis = select.value;
+            let note = document.getElementById("fast-jenis-note");
+            let grupNominalCepat = document.getElementById("fast-grup-nominal-cepat");
+            let grupKeterangan = document.getElementById("fast-grup-keterangan");
+            let keteranganInput = document.getElementById("fast-keterangan");
+            let tombol = document.getElementById("btn-proses-fast");
+
+            if (jenis === "ambil_cash") {
+                note.innerText = "ℹ️ Ambil cash mode cepat (tidak dipotong dari limit jajan harian santri).";
+                grupNominalCepat.style.display = "none";
+                grupKeterangan.style.display = "none";
+                keteranganInput.value = "";
+                tombol.innerText = "⚡ Proses ambil cash 💵";
+            } else if (jenis === "lainnya") {
+                note.innerText = "ℹ️ Keperluan lain mode cepat (tidak dipotong dari limit harian). Wajib isi keterangan.";
+                grupNominalCepat.style.display = "none";
+                grupKeterangan.style.display = "block";
+                keteranganInput.value = "";
+                tombol.innerText = "⚡ Proses transaksi 📝";
+            } else {
+                note.innerText = "ℹ️ Transaksi jajan cepat tanpa PIN. Nominal akan dipotong dari limit jajan harian santri.";
+                grupNominalCepat.style.display = "block";
+                grupKeterangan.style.display = "none";
+                keteranganInput.value = "";
+                tombol.innerText = "⚡ Proses transaksi jajan cepat 💳";
+            }
+        }
+
+        function angkaBersih(id) {
+            let val = document.getElementById(id).value || "";
+            return parseInt(val.replace(/\D/g, "")) || 0;
+        }
+
+        function getTodayLocalStr() {
+            const now = new Date();
+            const year = now.getFullYear();
+            const month = String(now.getMonth() + 1).padStart(2, '0');
+            const day = String(now.getDate()).padStart(2, '0');
+            return `${year}-${month}-${day}`;
+        }
+
+        document.addEventListener("DOMContentLoaded", function() {
+            updateNetworkStatus();
+            document.querySelectorAll(".input-rupiah").forEach(function(el) {
+                el.addEventListener("input", function() { formatAngkaInput(el); });
+            });
+
+            const today = getTodayLocalStr();
+            const tglTunggal = document.getElementById("input-tanggal-tunggal");
+            const tglAwal = document.getElementById("input-tanggal-awal");
+            const tglAkhir = document.getElementById("input-tanggal-akhir");
+            if (tglTunggal) tglTunggal.value = today;
+            if (tglAwal) tglAwal.value = today;
+            if (tglAkhir) tglAkhir.value = today;
+        });
+
+        async function hitungStatusHarian(santri) {
+            let limitHarian = santri["Limit Harian"] !== undefined && santri["Limit Harian"] !== null
+                ? santri["Limit Harian"]
+                : LIMIT_DEFAULT;
+
+            let todayStr = new Date().toISOString().split("T")[0];
+            let { data: logsHariIni, error } = await _supabase
+                .from(TABLE_LOG)
+                .select("*")
+                .eq("ID", santri.ID)
+                .ilike("Status", "%Jajan%")
+                .gte("Waktu", todayStr + "T00:00:00");
+
+            if (error) throw new Error("Gagal memeriksa riwayat jajan hari ini.");
+
+            let sudahJajan = 0;
+            if (logsHariIni) {
+                logsHariIni.forEach(log => { sudahJajan += parseInt(log.Nominal) || 0; });
+            }
+
+            let sisaLimit = limitHarian - sudahJajan;
+            return { limitHarian, sudahJajan, sisaLimit: sisaLimit < 0 ? 0 : sisaLimit };
+        }
+
+        function tampilkanKartuStatus(santri, status, badgeText) {
+            let box = document.getElementById("kantin-info-kartu");
+            if (!box) return;
+            box.style.display = "block";
+            document.getElementById("stat-nama").innerText = santri.Nama;
+            document.getElementById("stat-badge").innerText = badgeText || "Terdeteksi";
+            document.getElementById("stat-saldo").innerText = formatRupiah(santri.Saldo);
+            document.getElementById("stat-sudah-jajan").innerText = formatRupiah(status.sudahJajan);
+            document.getElementById("stat-sisa-limit").innerText = formatRupiah(status.sisaLimit);
+            document.getElementById("stat-limit-total").innerText = formatRupiah(status.limitHarian);
+
+            let persen = status.limitHarian > 0 ? Math.min(100, (status.sudahJajan / status.limitHarian) * 100) : 0;
+            let fill = document.getElementById("limit-bar-fill");
+            if (fill) fill.style.width = persen + "%";
+        }
+
+        function tampilkanKartuStatusFast(santri, status, badgeText) {
+            let box = document.getElementById("fast-info-kartu");
+            if (!box) return;
+            box.style.display = "block";
+            document.getElementById("fast-stat-nama").innerText = santri.Nama;
+            document.getElementById("fast-stat-badge").innerText = badgeText || "Terdeteksi";
+            document.getElementById("fast-stat-saldo").innerText = formatRupiah(santri.Saldo);
+            document.getElementById("fast-stat-sudah-jajan").innerText = formatRupiah(status.sudahJajan);
+            document.getElementById("fast-stat-sisa-limit").innerText = formatRupiah(status.sisaLimit);
+            document.getElementById("fast-stat-limit-total").innerText = formatRupiah(status.limitHarian);
+
+            let persen = status.limitHarian > 0 ? Math.min(100, (status.sudahJajan / status.limitHarian) * 100) : 0;
+            let fill = document.getElementById("fast-limit-bar-fill");
+            if (fill) fill.style.width = persen + "%";
+        }
+
+        function sembunyikanKartuStatus() {
+            let box = document.getElementById("kantin-info-kartu");
+            if (box) box.style.display = "none";
+        }
+
+        function sembunyikanKartuStatusFast() {
+            let box = document.getElementById("fast-info-kartu");
+            if (box) box.style.display = "none";
+        }
+
+        function resetFormKantin() {
+            let uidInput = document.getElementById("kantin-uid");
+            let jenisSelect = document.getElementById("kantin-jenis");
+            let cepatSelect = document.getElementById("kantin-nominal-cepat");
+            let nominalInput = document.getElementById("kantin-nominal");
+            let ketInput = document.getElementById("kantin-keterangan");
+            let adminKeyInput = document.getElementById("kantin-admin-key");
+            let pinInput = document.getElementById("kantin-pin");
+            let resultDiv = document.getElementById("kantin-result");
+
+            if (uidInput) uidInput.value = "";
+            if (jenisSelect) { jenisSelect.value = "jajan"; ubahJenisTransaksi(jenisSelect); }
+            if (cepatSelect) cepatSelect.value = "";
+            if (nominalInput) nominalInput.value = "0";
+            if (ketInput) ketInput.value = "";
+            if (adminKeyInput) adminKeyInput.value = "";
+            if (pinInput) pinInput.value = "";
+            if (resultDiv) resultDiv.innerText = "";
+            sembunyikanKartuStatus();
+            if (uidInput) uidInput.focus();
+        }
+
+        function resetFormFast() {
+            const uidInput = document.getElementById("fast-uid");
+            const jenisSelect = document.getElementById("fast-jenis");
+            const nominalInput = document.getElementById("fast-nominal");
+            const ketInput = document.getElementById("fast-keterangan");
+            const resultDiv = document.getElementById("fast-result");
+            const isLocked = document.getElementById("fast-lock-nominal")?.checked;
+
+            if (uidInput) uidInput.value = "";
+            if (resultDiv) resultDiv.innerText = "";
+            sembunyikanKartuStatusFast();
+
+            if (!isLocked) {
+                if (jenisSelect) { jenisSelect.value = "jajan"; ubahJenisTransaksiFast(jenisSelect); }
+                if (nominalInput) nominalInput.value = "0";
+                if (ketInput) ketInput.value = "";
+                document.querySelectorAll(".btn-quick-nom").forEach(b => b.classList.remove("selected"));
+            }
+            if (uidInput) uidInput.focus();
+        }
+
+        function resetFormTopUp() {
+            const uidEl = document.getElementById("topup-uid");
+            const nomEl = document.getElementById("topup-nominal");
+            const metEl = document.getElementById("topup-metode");
+            if (uidEl) uidEl.value = "";
+            if (nomEl) nomEl.value = "";
+            if (metEl) metEl.selectedIndex = 0;
+            if (uidEl) uidEl.focus();
+        }
+
+        function resetFormTabungan() {
+            const uidEl = document.getElementById("tabungan-uid");
+            const tipeEl = document.getElementById("tabungan-tipe");
+            const nomEl = document.getElementById("tabungan-nominal");
+            const ketEl = document.getElementById("tabungan-keterangan");
+            if (uidEl) uidEl.value = "";
+            if (tipeEl) tipeEl.selectedIndex = 0;
+            if (nomEl) nomEl.value = "";
+            if (ketEl) ketEl.value = "";
+            if (uidEl) uidEl.focus();
+        }
+
+        function luncurkanBalonMeriah() {
+            const layer = document.getElementById("balloon-layer");
+            if (!layer) return;
+            layer.innerHTML = "";
+
+            const warnaBalon = ["#D4A02E", "#E6B94C", "#132847", "#1D3B66", "#FF595E", "#8AC926", "#00BBF9", "#F15BB5", "#FFFFFF"];
+
+            for (let i = 0; i < 26; i++) {
+                const balon = document.createElement("div");
+                balon.className = "balloon-item";
+                const warna = warnaBalon[Math.floor(Math.random() * warnaBalon.length)];
+                const leftPos = Math.random() * 94 + 2;
+                const duration = (Math.random() * 2.2 + 2.8).toFixed(2);
+                const delay = (Math.random() * 0.8).toFixed(2);
+                const scale = (Math.random() * 0.45 + 0.8).toFixed(2);
+                const sway = (Math.random() * 40 + 15).toFixed(0) + "px";
+
+                balon.style.left = leftPos + "%";
+                balon.style.backgroundColor = warna;
+                balon.style.animationDuration = duration + "s";
+                balon.style.animationDelay = delay + "s";
+                balon.style.transform = `scale(${scale})`;
+                balon.style.setProperty("--sway", sway);
+                layer.appendChild(balon);
+            }
+
+            for (let j = 0; j < 40; j++) {
+                const konfeti = document.createElement("div");
+                konfeti.className = "confetti-piece";
+                konfeti.style.left = (Math.random() * 100) + "%";
+                konfeti.style.backgroundColor = warnaBalon[Math.floor(Math.random() * warnaBalon.length)];
+                konfeti.style.animationDuration = (Math.random() * 2 + 2.2).toFixed(2) + "s";
+                konfeti.style.animationDelay = (Math.random() * 0.5).toFixed(2) + "s";
+                layer.appendChild(konfeti);
+            }
+        }
+
+        function bersihkanBalon() {
+            const layer = document.getElementById("balloon-layer");
+            if (layer) layer.innerHTML = "";
+        }
+
+        function toggleSidebar() {
+            let sidebar = document.getElementById("app-sidebar");
+            let overlay = document.getElementById("sidebar-overlay");
+            if (sidebar) sidebar.classList.toggle("active");
+            if (overlay) overlay.classList.toggle("active");
+        }
+
+        function switchTab(evt, tabName) {
+            let contents = document.getElementsByClassName("tab-content");
+            for (let c of contents) c.classList.remove("active");
+
+            let buttons = document.getElementsByClassName("tab-btn");
+            for (let b of buttons) b.classList.remove("active");
+
+            let targetTab = document.getElementById(tabName);
+            if (targetTab) targetTab.classList.add("active");
+            if (evt && evt.currentTarget) evt.currentTarget.classList.add("active");
+
+            if (tabName === "tab-kantin") {
+                setTimeout(() => document.getElementById("kantin-uid")?.focus(), 100);
+            } else if (tabName === "tab-jajan-cepat") {
+                const fastDash = document.getElementById("fast-dashboard");
+                if (fastDash && fastDash.style.display === "block") {
+                    setTimeout(() => document.getElementById("fast-uid")?.focus(), 100);
+                } else {
+                    setTimeout(() => document.getElementById("fast-admin-key")?.focus(), 100);
+                }
+            }
+
+            if (window.innerWidth <= 768) toggleSidebar();
+        }
+
+        function switchSubTab(evt, subTabName) {
+            let contents = document.getElementsByClassName("sub-content");
+            for (let c of contents) c.classList.remove("active");
+
+            let buttons = document.querySelectorAll(".sub-tab-btn");
+            for (let b of buttons) b.classList.remove("active");
+
+            let targetSub = document.getElementById(subTabName);
+            if (targetSub) targetSub.classList.add("active");
+            if (evt && evt.currentTarget) evt.currentTarget.classList.add("active");
+        }
+
+        /* =========================================================
+           LOGIC KANTIN REGULER & LISTENER RFID
+           ========================================================= */
+        setTimeout(() => {
+            let kantinUidInput = document.getElementById("kantin-uid");
+            if (kantinUidInput) {
+                kantinUidInput.addEventListener("input", async function() {
+                    let uid = this.value.trim();
+                    if (uid.length < 3 || !navigator.onLine) { sembunyikanKartuStatus(); return; }
+                    try {
+                        let { data: santri, error } = await _supabase.from(TABLE_SANTRI).select("*").eq("UID", uid).maybeSingle();
+                        if (!error && santri) {
+                            let status = await hitungStatusHarian(santri);
+                            tampilkanKartuStatus(santri, status, "Terdeteksi");
+                        } else {
+                            sembunyikanKartuStatus();
+                        }
+                    } catch (e) {
+                        sembunyikanKartuStatus();
+                    }
+                });
+            }
+
+            // LISTENER UNTUK TAB JAJAN CEPAT (TANPA PIN)
+            let fastUidInput = document.getElementById("fast-uid");
+            if (fastUidInput) {
+                fastUidInput.addEventListener("input", function() {
+                    clearTimeout(fastScanTimer);
+                    let uid = this.value.trim();
+                    if (uid.length < 3 || !navigator.onLine) {
+                        sembunyikanKartuStatusFast();
+                        return;
+                    }
+                    fastScanTimer = setTimeout(async () => {
+                        await cekKartuJajanCepat(uid);
+                    }, 180);
+                });
+
+                fastUidInput.addEventListener("keydown", async function(e) {
+                    if (e.key === "Enter") {
+                        e.preventDefault();
+                        clearTimeout(fastScanTimer);
+                        let uid = this.value.trim();
+                        if (!uid) return;
+                        const isLocked = document.getElementById("fast-lock-nominal").checked;
+                        const nom = angkaBersih("fast-nominal");
+                        if (isLocked && nom > 0) {
+                            await prosesJajanCepat();
+                        } else {
+                            await cekKartuJajanCepat(uid);
+                            const nomInput = document.getElementById("fast-nominal");
+                            nomInput.focus();
+                            nomInput.select();
+                        }
+                    }
+                });
+            }
+        }, 500);
+
+        async function prosesJajan() {
+            let resultDiv = document.getElementById("kantin-result");
+            let btnProses = document.getElementById("btn-proses-jajan");
+
+            if (!navigator.onLine) {
+                resultDiv.style.color = "#DC2626";
+                resultDiv.innerText = "❌ Koneksi internet terputus (Offline)! Transaksi jajan tidak dapat diproses.";
+                return;
+            }
+
+            if (isProcessingTx) return;
+
+            let uid = document.getElementById("kantin-uid").value.trim();
+            let jenis = document.getElementById("kantin-jenis").value;
+            let adminKey = document.getElementById("kantin-admin-key").value.trim();
+            let nominal = angkaBersih("kantin-nominal");
+            let keterangan = document.getElementById("kantin-keterangan").value.trim();
+            let pin = document.getElementById("kantin-pin").value.trim();
+
+            if (!uid || !(nominal > 0) || !pin) {
+                resultDiv.style.color = "#DC2626";
+                resultDiv.innerText = "❌ Harap isi UID, nominal (> 0), dan PIN dengan benar!";
+                return;
+            }
+
+            if (jenis === "ambil_cash" || jenis === "lainnya") {
+                if (!adminKey) {
+                    resultDiv.style.color = "#DC2626";
+                    resultDiv.innerText = "❌ Transaksi Ambil Cash / Keperluan Lain wajib memasukkan Kunci Admin!";
+                    document.getElementById("kantin-admin-key").focus();
+                    return;
+                }
+                if (!isValidAdminKey(adminKey)) {
+                    resultDiv.style.color = "#DC2626";
+                    resultDiv.innerText = "❌ Kunci Admin salah! Hanya admin yang dapat memproses transaksi ini.";
+                    document.getElementById("kantin-admin-key").focus();
+                    return;
+                }
+            }
+
+            if (jenis === "lainnya" && !keterangan) {
+                resultDiv.style.color = "#DC2626";
+                resultDiv.innerText = "❌ Harap isi keterangan transaksi!";
+                return;
+            }
+
+            isProcessingTx = true;
+            const teksTombolAsli = btnProses.innerText;
+            btnProses.disabled = true;
+            btnProses.innerText = "⏳ Memproses transaksi...";
+            resultDiv.style.color = "#132847";
+            resultDiv.innerText = "⏳ Menghubungkan ke server...";
+
+            try {
+                let { data: santri, error: errSantri } = await _supabase
+                    .from(TABLE_SANTRI)
+                    .select("*")
+                    .eq("UID", uid)
+                    .maybeSingle();
+
+                if (errSantri) throw new Error("Koneksi ke server/internet bermasalah. Transaksi dibatalkan.");
+
+                if (!santri) {
+                    resultDiv.style.color = "#DC2626";
+                    resultDiv.innerText = "❌ Kartu belum terdaftar di database!";
+                    return;
+                }
+
+                if (parseInt(pin) !== parseInt(santri.Pin)) {
+                    resultDiv.style.color = "#DC2626";
+                    resultDiv.innerText = "❌ PIN salah! Silakan coba lagi.";
+                    return;
+                }
+
+                if (nominal > santri.Saldo) {
+                    resultDiv.style.color = "#DC2626";
+                    resultDiv.innerText = `❌ Saldo jajan tidak cukup. Saldo saat ini: ${formatRupiah(santri.Saldo)}`;
+                    return;
+                }
+
+                let status = await hitungStatusHarian(santri);
+                if (jenis === "jajan" && nominal > status.sisaLimit) {
+                    resultDiv.style.color = "#DC2626";
+                    resultDiv.innerText = `❌ Melebihi limit harian. Sisa limit: ${formatRupiah(status.sisaLimit)}`;
+                    return;
+                }
+
+                let statusText = jenis === "ambil_cash"
+                    ? "Ambil Cash (Admin) - Berhasil"
+                    : (jenis === "lainnya" ? `Lainnya (Admin) - Berhasil: ${keterangan}` : "Jajan - Berhasil");
+                let saldoBaru = santri.Saldo - nominal;
+                let sisaLimitBaru = jenis === "jajan" ? Math.max(0, status.sisaLimit - nominal) : status.sisaLimit;
+
+                const { error: errUpdate } = await _supabase
+                    .from(TABLE_SANTRI)
+                    .update({ Saldo: saldoBaru })
+                    .eq("UID", uid);
+
+                if (errUpdate) throw new Error("Gagal menyimpan pembaruan saldo karena koneksi error. Silakan coba lagi.");
+
+                const { error: errLog } = await _supabase
+                    .from(TABLE_LOG)
+                    .insert([{
+                        Waktu: new Date().toISOString(),
+                        ID: santri.ID,
+                        Nama: santri.Nama,
+                        Nominal: nominal.toString(),
+                        Status: statusText
+                    }]);
+
+                if (errLog) {
+                    await _supabase.from(TABLE_SANTRI).update({ Saldo: santri.Saldo }).eq("UID", uid);
+                    throw new Error("Koneksi internet terputus saat mencatat log. Transaksi dibatalkan & saldo dikembalikan.");
+                }
+
+                const summaryBox = document.getElementById("last-tx-summary");
+                if (summaryBox) {
+                    summaryBox.style.display = "block";
+                    document.getElementById("summary-nama-santri").innerText = santri.Nama;
+                    document.getElementById("summary-jajan-nominal").innerText = formatRibu(nominal);
+                    document.getElementById("summary-sisa-saldo").innerText = formatRupiah(saldoBaru);
+                    document.getElementById("summary-sisa-limit").innerText = formatRupiah(sisaLimitBaru);
+                }
+
+                resetFormKantin();
+                tampilkanPopupSukses(santri.Nama, saldoBaru, sisaLimitBaru, nominal, statusText, "kantin");
+
+            } catch (err) {
+                resultDiv.style.color = "#DC2626";
+                resultDiv.innerText = `❌ Internet / Jaringan Error: ${err.message || "Gagal terhubung ke server. Transaksi tidak diproses."}`;
+            } finally {
+                isProcessingTx = false;
+                btnProses.disabled = false;
+                if (document.getElementById("kantin-jenis").value === "jajan") {
+                    btnProses.innerText = "Proses transaksi jajan 💳";
+                } else {
+                    btnProses.innerText = teksTombolAsli;
+                }
+            }
+        }
+
+        /* =========================================================
+           LOGIC JAJAN CEPAT (TANPA PIN - SAMA FITUR + POPUP BALON)
+           ========================================================= */
+        function loginFastMode() {
+            const key = document.getElementById("fast-admin-key").value;
+            const res = document.getElementById("fast-login-result");
+            if (isValidAdminKey(key)) {
+                document.getElementById("fast-login-box").style.display = "none";
+                document.getElementById("fast-dashboard").style.display = "block";
+                document.getElementById("fast-admin-key").value = "";
+                res.innerText = "";
+                fastTxCount = 0;
+                document.getElementById("fast-tx-counter").innerText = "0 trx";
+                setTimeout(() => document.getElementById("fast-uid").focus(), 100);
+            } else {
+                res.style.color = "#DC2626";
+                res.innerText = "❌ Sandi admin salah! Akses ditolak.";
+            }
+        }
+
+        function logoutFastMode() {
+            document.getElementById("fast-login-box").style.display = "block";
+            document.getElementById("fast-dashboard").style.display = "none";
+            document.getElementById("fast-admin-key").value = "";
+            document.getElementById("fast-lock-nominal").checked = false;
+            resetFormFast();
+        }
+
+        function setFastNominal(val, btnEl) {
+            const input = document.getElementById("fast-nominal");
+            input.value = val;
+            formatAngkaInput(input);
+            document.querySelectorAll(".btn-quick-nom").forEach(b => b.classList.remove("selected"));
+            if (btnEl) btnEl.classList.add("selected");
+
+            const uid = document.getElementById("fast-uid").value.trim();
+            if (!uid) {
+                document.getElementById("fast-uid").focus();
+            } else {
+                document.getElementById("btn-proses-fast").focus();
+            }
+        }
+
+        function toggleLockNominalFast() {
+            const isChecked = document.getElementById("fast-lock-nominal").checked;
+            const nom = angkaBersih("fast-nominal");
+            const resDiv = document.getElementById("fast-result");
+            if (isChecked && nom <= 0) {
+                resDiv.style.color = "#DC2626";
+                resDiv.innerText = "⚠️ Pilih atau isi nominal jajan terlebih dahulu sebelum mengunci nominal!";
+                document.getElementById("fast-lock-nominal").checked = false;
+                document.getElementById("fast-nominal").focus();
+                return;
+            }
+            resDiv.innerText = "";
+            document.getElementById("fast-uid").focus();
+        }
+
+        async function cekKartuJajanCepat(uid) {
+            try {
+                let { data: santri, error } = await _supabase
+                    .from(TABLE_SANTRI)
+                    .select("*")
+                    .eq("UID", uid)
+                    .maybeSingle();
+
+                if (!error && santri) {
+                    let status = await hitungStatusHarian(santri);
+                    tampilkanKartuStatusFast(santri, status, "Terdeteksi");
+
+                    // Jika mode kunci nominal aktif, otomatis langsung proses bayar!
+                    const isLocked = document.getElementById("fast-lock-nominal").checked;
+                    const nom = angkaBersih("fast-nominal");
+                    if (isLocked && nom > 0) {
+                        await prosesJajanCepat();
+                    }
+                } else {
+                    sembunyikanKartuStatusFast();
+                }
+            } catch (e) {
+                sembunyikanKartuStatusFast();
+            }
+        }
+
+        async function prosesJajanCepat() {
+            const resultDiv = document.getElementById("fast-result");
+            const btnFast = document.getElementById("btn-proses-fast");
+
+            if (!navigator.onLine) {
+                resultDiv.style.color = "#DC2626";
+                resultDiv.innerText = "❌ Koneksi internet terputus (Offline)! Transaksi jajan tidak dapat diproses.";
+                return;
+            }
+
+            if (isProcessingTx) return;
+
+            const uidEl = document.getElementById("fast-uid");
+            const nomEl = document.getElementById("fast-nominal");
+            const jenis = document.getElementById("fast-jenis").value;
+            const keterangan = document.getElementById("fast-keterangan").value.trim();
+
+            const uid = uidEl.value.trim();
+            const nominal = angkaBersih("fast-nominal");
+
+            if (!uid || !(nominal > 0)) {
+                resultDiv.style.color = "#DC2626";
+                resultDiv.innerText = "❌ Harap tempelkan kartu RFID dan pilih/isi nominal (> 0)!";
+                if (!uid) uidEl.focus(); else nomEl.focus();
+                return;
+            }
+
+            if (jenis === "lainnya" && !keterangan) {
+                resultDiv.style.color = "#DC2626";
+                resultDiv.innerText = "❌ Harap isi keterangan transaksi!";
+                document.getElementById("fast-keterangan").focus();
+                return;
+            }
+
+            isProcessingTx = true;
+            const teksTombolAsli = btnFast.innerText;
+            btnFast.disabled = true;
+            btnFast.innerText = "⏳ Memproses transaksi...";
+            resultDiv.style.color = "#132847";
+            resultDiv.innerText = "⏳ Menghubungkan ke server...";
+
+            try {
+                let { data: santri, error: errSantri } = await _supabase
+                    .from(TABLE_SANTRI)
+                    .select("*")
+                    .eq("UID", uid)
+                    .maybeSingle();
+
+                if (errSantri) throw new Error("Koneksi ke server/internet bermasalah. Transaksi dibatalkan.");
+
+                if (!santri) {
+                    resultDiv.style.color = "#DC2626";
+                    resultDiv.innerText = "❌ Kartu belum terdaftar di database!";
+                    uidEl.value = "";
+                    uidEl.focus();
+                    return;
+                }
+
+                if (nominal > (santri.Saldo || 0)) {
+                    resultDiv.style.color = "#DC2626";
+                    resultDiv.innerText = `❌ Saldo jajan ${santri.Nama} tidak cukup. Saldo saat ini: ${formatRupiah(santri.Saldo)}`;
+                    uidEl.value = "";
+                    uidEl.focus();
+                    return;
+                }
+
+                let status = await hitungStatusHarian(santri);
+                if (jenis === "jajan" && nominal > status.sisaLimit) {
+                    resultDiv.style.color = "#DC2626";
+                    resultDiv.innerText = `❌ ${santri.Nama} melebihi limit harian. Sisa limit: ${formatRupiah(status.sisaLimit)}`;
+                    uidEl.value = "";
+                    uidEl.focus();
+                    return;
+                }
+
+                let statusText = jenis === "ambil_cash"
+                    ? "Ambil Cash (Express) - Berhasil"
+                    : (jenis === "lainnya" ? `Lainnya (Express) - Berhasil: ${keterangan}` : "Jajan Cepat - Berhasil");
+
+                const saldoBaru = santri.Saldo - nominal;
+                const sisaLimitBaru = jenis === "jajan" ? Math.max(0, status.sisaLimit - nominal) : status.sisaLimit;
+
+                const { error: errUpdate } = await _supabase
+                    .from(TABLE_SANTRI)
+                    .update({ Saldo: saldoBaru })
+                    .eq("UID", uid);
+
+                if (errUpdate) throw new Error("Gagal menyimpan pembaruan saldo karena koneksi error.");
+
+                const { error: errLog } = await _supabase
+                    .from(TABLE_LOG)
+                    .insert([{
+                        Waktu: new Date().toISOString(),
+                        ID: santri.ID,
+                        Nama: santri.Nama,
+                        Nominal: nominal.toString(),
+                        Status: statusText
+                    }]);
+
+                if (errLog) {
+                    await _supabase.from(TABLE_SANTRI).update({ Saldo: santri.Saldo }).eq("UID", uid);
+                    throw new Error("Koneksi internet terputus saat mencatat log. Transaksi dibatalkan & saldo dikembalikan.");
+                }
+
+                fastTxCount++;
+                document.getElementById("fast-tx-counter").innerText = `${fastTxCount} trx`;
+
+                // Update ringkasan transaksi terakhir di tab Jajan Cepat
+                document.getElementById("fast-last-summary").style.display = "block";
+                document.getElementById("fast-sum-nama").innerText = santri.Nama;
+                document.getElementById("fast-sum-nominal").innerText = formatRibu(nominal);
+                document.getElementById("fast-sum-saldo").innerText = formatRupiah(saldoBaru);
+                document.getElementById("fast-sum-limit").innerText = formatRupiah(sisaLimitBaru);
+
+                resetFormFast();
+                // Tampilkan popup & balon meriah seperti transaksi PIN!
+                tampilkanPopupSukses(santri.Nama, saldoBaru, sisaLimitBaru, nominal, statusText, "fast");
+
+            } catch (err) {
+                resultDiv.style.color = "#DC2626";
+                resultDiv.innerText = `❌ Internet / Jaringan Error: ${err.message || "Gagal terhubung ke server."}`;
+            } finally {
+                isProcessingTx = false;
+                btnFast.disabled = false;
+                if (document.getElementById("fast-jenis").value === "jajan") {
+                    btnFast.innerText = "⚡ Proses transaksi jajan cepat 💳";
+                } else {
+                    btnFast.innerText = teksTombolAsli;
+                }
+            }
+        }
+
+        /* =========================================================
+           LOGIC BENDAHARA, TOP-UP, TABUNGAN & SPP
+           ========================================================= */
+        function loginAdmin() {
+            let key = document.getElementById("admin-key").value;
+            let res = document.getElementById("login-result");
+            if (isValidAdminKey(key)) {
+                document.getElementById("admin-login-box").style.display = "none";
+                document.getElementById("admin-dashboard").style.display = "block";
+                res.innerText = "";
+            } else {
+                res.style.color = "#DC2626";
+                res.innerText = "❌ Kunci admin salah!";
+            }
+        }
+
+        function logoutAdmin() {
+            document.getElementById("admin-login-box").style.display = "block";
+            document.getElementById("admin-dashboard").style.display = "none";
+            document.getElementById("admin-key").value = "";
+        }
+
+        async function prosesTopUp() {
+            let uid = document.getElementById("topup-uid").value.trim();
+            let nominal = angkaBersih("topup-nominal");
+            let metode = document.getElementById("topup-metode").value;
+            let resDiv = document.getElementById("topup-result");
+            let btnTopup = document.getElementById("btn-proses-topup");
+
+            if (!navigator.onLine) {
+                resDiv.style.color = "#DC2626";
+                resDiv.innerText = "❌ Koneksi internet terputus! Top-up tidak dapat diproses.";
+                return;
+            }
+
+            if (!uid || !(nominal > 0)) {
+                resDiv.style.color = "#DC2626";
+                resDiv.innerText = "❌ UID dan nominal harus diisi!";
+                return;
+            }
+
+            btnTopup.disabled = true;
+            btnTopup.innerText = "⏳ Memproses top-up...";
+
+            try {
+                let { data: santri, error: errFind } = await _supabase
+                    .from(TABLE_SANTRI)
+                    .select("*")
+                    .or(`UID.eq.${uid},ID.eq.${isNaN(uid) ? -1 : uid}`)
+                    .maybeSingle();
+
+                if (errFind) throw new Error("Gagal terhubung ke server.");
+
+                if (!santri) {
+                    resDiv.style.color = "#DC2626";
+                    resDiv.innerText = "❌ Kartu santri tidak ditemukan.";
+                    return;
+                }
+
+                let statusText = metode === "qris" ? "Top-up QRIS - Berhasil" : "Top-up BSI/Cash - Berhasil";
+                let saldoBaru = (santri.Saldo || 0) + nominal;
+
+                const { error: errUpd } = await _supabase.from(TABLE_SANTRI).update({ Saldo: saldoBaru }).eq("UID", santri.UID);
+                if (errUpd) throw new Error("Gagal menyimpan saldo top-up.");
+
+                const { error: errLog } = await _supabase.from(TABLE_LOG).insert([{
+                    Waktu: new Date().toISOString(),
+                    ID: santri.ID,
+                    Nama: santri.Nama,
+                    Nominal: nominal.toString(),
+                    Status: statusText
+                }]);
+                if (errLog) throw new Error("Gagal mencatat riwayat top-up.");
+
+                resetFormTopUp();
+
+                resDiv.style.color = "#059669";
+                resDiv.innerHTML = `✅ Top-up <b>${santri.Nama}</b> sebesar <b>${formatRupiah(nominal)}</b> berhasil!<br>Saldo jajan baru: <b>${formatRupiah(saldoBaru)}</b>`;
+            } catch (err) {
+                resDiv.style.color = "#DC2626";
+                resDiv.innerText = `❌ Internet / Jaringan Error: ${err.message}`;
+            } finally {
+                btnTopup.disabled = false;
+                btnTopup.innerText = "Proses top-up 💰";
+            }
+        }
+
+        async function prosesTabunganSantri() {
+            let inputId = document.getElementById("tabungan-uid").value.trim();
+            let tipe = document.getElementById("tabungan-tipe").value;
+            let nominal = angkaBersih("tabungan-nominal");
+            let keterangan = document.getElementById("tabungan-keterangan").value.trim();
+            let resDiv = document.getElementById("tabungan-result");
+            let btnTab = document.getElementById("btn-proses-tabungan");
+
+            if (!navigator.onLine) {
+                resDiv.style.color = "#DC2626";
+                resDiv.innerText = "❌ Koneksi internet terputus! Proses tabungan dibatalkan.";
+                return;
+            }
+
+            if (!inputId || !(nominal > 0)) {
+                resDiv.style.color = "#DC2626";
+                resDiv.innerText = "❌ Harap isi ID/UID Santri dan Nominal dengan benar!";
+                return;
+            }
+
+            btnTab.disabled = true;
+            btnTab.innerText = "⏳ Memproses tabungan...";
+
+            try {
+                let { data: santri, error: errFind } = await _supabase
+                    .from(TABLE_SANTRI)
+                    .select("*")
+                    .or(`UID.eq.${inputId},ID.eq.${isNaN(inputId) ? -1 : inputId}`)
+                    .maybeSingle();
+
+                if (errFind) throw new Error("Gagal terhubung ke server.");
+
+                if (!santri) {
+                    resDiv.style.color = "#DC2626";
+                    resDiv.innerText = "❌ Data santri tidak ditemukan di database.";
+                    return;
+                }
+
+                let saldoTabunganLama = Number(santri.saldo_tabungan) || 0;
+                let saldoTabunganBaru = 0;
+                let statusLog = "";
+
+                if (tipe === "setor") {
+                    saldoTabunganBaru = saldoTabunganLama + nominal;
+                    statusLog = keterangan ? `Setor Tabungan - Berhasil: ${keterangan}` : "Setor Tabungan - Berhasil";
+                } else {
+                    if (saldoTabunganLama < nominal) {
+                        resDiv.style.color = "#DC2626";
+                        resDiv.innerText = `❌ Saldo tabungan tidak cukup! Saldo saat ini: ${formatRupiah(saldoTabunganLama)}`;
+                        return;
+                    }
+                    saldoTabunganBaru = saldoTabunganLama - nominal;
+                    statusLog = keterangan ? `Tarik Tabungan - Berhasil: ${keterangan}` : "Tarik Tabungan - Berhasil";
+                }
+
+                const { error: errUpd } = await _supabase.from(TABLE_SANTRI).update({ saldo_tabungan: saldoTabunganBaru }).eq("ID", santri.ID);
+                if (errUpd) throw new Error("Gagal memperbarui saldo tabungan.");
+
+                const { error: errLog } = await _supabase.from(TABLE_LOG).insert([{
+                    Waktu: new Date().toISOString(),
+                    ID: santri.ID,
+                    Nama: santri.Nama,
+                    Nominal: nominal.toString(),
+                    Status: statusLog
+                }]);
+                if (errLog) throw new Error("Gagal mencatat riwayat tabungan.");
+
+                resetFormTabungan();
+
+                resDiv.style.color = "#059669";
+                resDiv.innerHTML = `✅ Berhasil memproses <b>${tipe === 'setor' ? 'Setor' : 'Tarik'} Tabungan (${santri.Nama})</b> sebesar <b>${formatRupiah(nominal)}</b>!<br>Sisa Saldo Tabungan: <b>${formatRupiah(saldoTabunganBaru)}</b>`;
+            } catch (err) {
+                resDiv.style.color = "#DC2626";
+                resDiv.innerText = `❌ Internet / Jaringan Error: ${err.message}`;
+            } finally {
+                btnTab.disabled = false;
+                btnTab.innerText = "Proses Tabungan 🏦";
+            }
+        }
+
+        async function prosesCekSaldo() {
+            let uid = document.getElementById("cek-uid").value.trim();
+            let resDiv = document.getElementById("cek-result");
+            if (!navigator.onLine) {
+                resDiv.style.color = "#DC2626";
+                resDiv.innerText = "❌ Koneksi internet terputus!";
+                return;
+            }
+            let { data: santri } = await _supabase.from(TABLE_SANTRI).select("*").or(`UID.eq.${uid},ID.eq.${isNaN(uid) ? -1 : uid}`).maybeSingle();
+
+            if (santri) {
+                resDiv.style.color = "#059669";
+                resDiv.innerHTML = `
+                    🔍 <b>${santri.Nama}</b><br>
+                    Saldo Jajan: ${formatRupiah(santri.Saldo)}<br>
+                    Saldo Tabungan: ${formatRupiah(santri.saldo_tabungan)}
+                `;
+            } else {
+                resDiv.style.color = "#DC2626";
+                resDiv.innerText = "❌ Kartu tidak ditemukan.";
+            }
+        }
+
+        /* =========================================================
+           FUNGSI DASHBOARD PEMASUKAN & REKAP TERPISAH (TOP-UP VS JAJAN)
+           ========================================================= */
+        function ubahModeFilterWaktu() {
+            const mode = document.getElementById("filter-mode-waktu").value;
+            const boxTunggal = document.getElementById("box-per-tanggal");
+            const boxRentang = document.getElementById("box-rentang-tanggal");
+
+            boxTunggal.style.display = (mode === "per_tanggal") ? "block" : "none";
+            boxRentang.style.display = (mode === "rentang") ? "grid" : "none";
+
+            muatDataPemasukan();
+        }
+
+        async function loginPemasukan() {
+            let pw = document.getElementById("pemasukan-pw").value;
+            let res = document.getElementById("pemasukan-login-result");
+            if (isValidAdminKey(pw)) {
+                document.getElementById("pemasukan-login-box").style.display = "none";
+                document.getElementById("pemasukan-dashboard").style.display = "block";
+                res.innerText = "";
+                muatDataPemasukan();
+            } else {
+                res.style.color = "#DC2626";
+                res.innerText = "❌ Password salah!";
+            }
+        }
+
+        async function muatDataPemasukan() {
+            let tbody = document.getElementById("pema-table-body");
+            if (!navigator.onLine) {
+                if (tbody) tbody.innerHTML = `<tr><td colspan="4" style="text-align: center; color: var(--danger);">❌ Koneksi internet terputus. Tidak dapat memuat data.</td></tr>`;
+                return;
+            }
+            if (tbody) tbody.innerHTML = `<tr><td colspan="4" style="text-align: center; color: var(--muted);">Mengambil data dari database...</td></tr>`;
+
+            const modeWaktu = document.getElementById("filter-mode-waktu").value;
+            const filterKategori = document.getElementById("filter-kategori-log").value;
+            const infoBadge = document.getElementById("info-rentang-aktif");
+
+            let query = _supabase
+                .from(TABLE_LOG)
+                .select("*")
+                .order("Waktu", { ascending: false });
+
+            if (modeWaktu === "hari_ini") {
+                const today = getTodayLocalStr();
+                query = query.gte("Waktu", `${today}T00:00:00`).lte("Waktu", `${today}T23:59:59`);
+                infoBadge.innerText = `Menampilkan: Hari Ini (${new Date().toLocaleDateString("id-ID", { dateStyle: "long" })})`;
+            } else if (modeWaktu === "per_tanggal") {
+                const tgl = document.getElementById("input-tanggal-tunggal").value;
+                if (tgl) {
+                    query = query.gte("Waktu", `${tgl}T00:00:00`).lte("Waktu", `${tgl}T23:59:59`);
+                    infoBadge.innerText = `Menampilkan: Tanggal ${new Date(tgl).toLocaleDateString("id-ID", { dateStyle: "long" })}`;
+                }
+            } else if (modeWaktu === "rentang") {
+                const tglAwal = document.getElementById("input-tanggal-awal").value;
+                const tglAkhir = document.getElementById("input-tanggal-akhir").value;
+                if (tglAwal && tglAkhir) {
+                    query = query.gte("Waktu", `${tglAwal}T00:00:00`).lte("Waktu", `${tglAkhir}T23:59:59`);
+                    const strAwal = new Date(tglAwal).toLocaleDateString("id-ID", { day: "numeric", month: "short", year: "numeric" });
+                    const strAkhir = new Date(tglAkhir).toLocaleDateString("id-ID", { day: "numeric", month: "short", year: "numeric" });
+                    infoBadge.innerText = `Menampilkan Rentang: ${strAwal} s/d ${strAkhir}`;
+                }
+            } else {
+                query = query.limit(5000);
+                infoBadge.innerText = `Menampilkan: Seluruh Data (Dari Awal s/d Terakhir)`;
+            }
+
+            let { data: logs, error } = await query;
+
+            if (error) {
+                if (tbody) tbody.innerHTML = `<tr><td colspan="4" style="text-align: center; color: var(--danger);">Gagal memuat data: ${error.message}</td></tr>`;
+                return;
+            }
+
+            let totalTopup = 0, countTopup = 0;
+            let totalJajan = 0, countJajan = 0;
+            let totalLainnya = 0, countLainnya = 0;
+            let totalSemua = 0, countSemua = 0;
+
+            let htmlRows = "";
+            let barisDitampilkan = 0;
+
+            if (!logs || logs.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="4" style="text-align: center; color: var(--muted);">Tidak ada data transaksi pada periode ini.</td></tr>`;
+                document.getElementById("pema-total-topup").innerText = formatRupiah(0);
+                document.getElementById("pema-count-topup").innerText = "0 transaksi top-up";
+                document.getElementById("pema-total-jajan").innerText = formatRupiah(0);
+                document.getElementById("pema-count-jajan").innerText = "0 transaksi jajan";
+                document.getElementById("pema-total-lainnya").innerText = formatRupiah(0);
+                document.getElementById("pema-count-lainnya").innerText = "0 transaksi";
+                document.getElementById("pema-total-semua").innerText = formatRupiah(0);
+                document.getElementById("pema-count-semua").innerText = "Total 0 log tercatat";
+                document.getElementById("label-jumlah-baris").innerText = "0 baris";
+                return;
+            }
+
+            logs.forEach(log => {
+                let nominal = parseInt(log.Nominal) || 0;
+                let statusLower = (log.Status || "").toLowerCase();
+
+                let tipe = "lainnya";
+                if (statusLower.includes("top-up") || statusLower.includes("topup")) {
+                    tipe = "topup";
+                    totalTopup += nominal;
+                    countTopup++;
+                } else if (statusLower.includes("jajan")) {
+                    tipe = "jajan";
+                    totalJajan += nominal;
+                    countJajan++;
+                } else {
+                    tipe = "lainnya";
+                    totalLainnya += nominal;
+                    countLainnya++;
+                }
+
+                totalSemua += nominal;
+                countSemua++;
+
+                if (filterKategori !== "semua" && filterKategori !== tipe) {
+                    return;
+                }
+
+                barisDitampilkan++;
+                let waktuFormatted = log.Waktu ? new Date(log.Waktu).toLocaleString("id-ID", { day: "2-digit", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit" }) : "-";
+
+                let badgeClass = tipe === "topup" ? "badge-topup" : (tipe === "jajan" ? "badge-jajan" : "badge-other");
+
+                htmlRows += `
+                    <tr>
+                        <td style="white-space:nowrap;">${waktuFormatted}</td>
+                        <td><b>${log.Nama || '-'}</b></td>
+                        <td><span class="${badgeClass}">${log.Status || '-'}</span></td>
+                        <td style="white-space:nowrap;"><b>${formatRupiah(nominal)}</b></td>
+                    </tr>
+                `;
+            });
+
+            document.getElementById("pema-total-topup").innerText = formatRupiah(totalTopup);
+            document.getElementById("pema-count-topup").innerText = `${countTopup} transaksi top-up`;
+
+            document.getElementById("pema-total-jajan").innerText = formatRupiah(totalJajan);
+            document.getElementById("pema-count-jajan").innerText = `${countJajan} transaksi jajan`;
+
+            document.getElementById("pema-total-lainnya").innerText = formatRupiah(totalLainnya);
+            document.getElementById("pema-count-lainnya").innerText = `${countLainnya} transaksi`;
+
+            document.getElementById("pema-total-semua").innerText = formatRupiah(totalSemua);
+            document.getElementById("pema-count-semua").innerText = `Total ${countSemua} log tercatat`;
+
+            document.getElementById("label-jumlah-baris").innerText = `${barisDitampilkan} baris ditampilkan`;
+            tbody.innerHTML = htmlRows || `<tr><td colspan="4" style="text-align: center; color: var(--muted);">Tidak ada transaksi untuk kategori ini.</td></tr>`;
+        }
+
+        function logoutPemasukan() {
+            document.getElementById("pemasukan-login-box").style.display = "block";
+            document.getElementById("pemasukan-dashboard").style.display = "none";
+            document.getElementById("pemasukan-pw").value = "";
+        }
+
+        function tampilkanPopupSukses(nama, saldoSisa, sisaLimit, nominal, status, context = "kantin") {
+            activePopupContext = context;
+            let detail = document.getElementById("popup-content-detail");
+            let balon = document.getElementById("popup-balon");
+
+            if (detail) {
+                detail.innerHTML = `
+                    <b>Nama Santri:</b> ${nama}<br>
+                    <b>Status:</b> ${status}<br>
+                    <b>Jajan / Nominal:</b> ${formatRibu(nominal)}<br>
+                    <b>Sisa Saldo Jajan:</b> ${formatRupiah(saldoSisa)}<br>
+                    <b>Sisa Limit Harian:</b> ${formatRupiah(sisaLimit)}
+                `;
+            }
+
+            if (balon) balon.style.display = "flex";
+            luncurkanBalonMeriah();
+
+            if (autoResetTimer) clearTimeout(autoResetTimer);
+            const durasiAutoClose = context === "fast" ? 2200 : 4500;
+            autoResetTimer = setTimeout(() => { tutupPopup(); }, durasiAutoClose);
+        }
+
+        function tutupPopup() {
+            if (autoResetTimer) clearTimeout(autoResetTimer);
+            let balon = document.getElementById("popup-balon");
+            if (balon) balon.style.display = "none";
+            bersihkanBalon();
+            if (activePopupContext === "fast") {
+                resetFormFast();
+            } else {
+                resetFormKantin();
+            }
+        }
+    </script>
+</body>
+</html>
